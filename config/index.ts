@@ -35,6 +35,9 @@ export default defineConfig<'vite'>({
     enable: false
   },
   mini: {
+    optimizeMainPackage: {
+      enable: true,
+    },
     postcss: {
       pxtransform: {
         enable: true,

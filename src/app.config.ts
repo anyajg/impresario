@@ -1,13 +1,33 @@
 export default defineAppConfig({
   pages: [
+    // 主包只保留首页，降低主包体积（微信主包限制 2MB）
     'pages/index/index',
-    'pages/knowledge/index',
-    'pages/knowledge/detail',
-    'pages/practice/index',
-    'pages/wrongBook/index',
-    'pages/exam/index',
-    'pages/examResult/index',
-    'pages/aiSettings/index',
+  ],
+  subPackages: [
+    {
+      root: 'pages/knowledge',
+      pages: ['index', 'detail'],
+    },
+    {
+      root: 'pages/practice',
+      pages: ['index'],
+    },
+    {
+      root: 'pages/wrongBook',
+      pages: ['index'],
+    },
+    {
+      root: 'pages/exam',
+      pages: ['index'],
+    },
+    {
+      root: 'pages/examResult',
+      pages: ['index'],
+    },
+    {
+      root: 'pages/aiSettings',
+      pages: ['index'],
+    },
   ],
   window: {
     backgroundTextStyle: 'dark',

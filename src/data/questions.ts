@@ -1,5 +1,4 @@
 import type { Chapter, Question } from './questions.types';
-import { autoQuestions } from './questions.auto';
 import { importedQuestions } from './questions.imported';
 
 export type { Chapter, Question, QuestionChoiceType } from './questions.types';
@@ -357,7 +356,18 @@ const baseQuestions: Question[] = [
   },
 ];
 
-export const questions: Question[] = [...baseQuestions, ...importedQuestions, ...autoQuestions];
+// 小程序主包/分包体积限制严格（单包 2MB），超大自动题库仅在 H5 端启用。
+let platformAutoQuestions: Question[] = [];
+if (process.env.TARO_ENV !== 'weapp') {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
+  platformAutoQuestions = require('./questions.auto').autoQuestions as Question[];
+}
+
+export const questions: Question[] = [
+  ...baseQuestions,
+  ...importedQuestions,
+  ...platformAutoQuestions,
+];
 
 export function getQuestionsByChapter(chapterId: number): Question[] {
   return questions.filter((q) => q.chapter === chapterId);
