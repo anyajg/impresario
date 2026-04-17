@@ -137,6 +137,10 @@ function PracticePage() {
     }
   };
 
+  const goHome = () => {
+    Taro.redirectTo({ url: '/pages/index/index' });
+  };
+
   const handleAI = useCallback(async () => {
     if (!ensureAIConfigured()) return;
     if (aiText || aiLoading) return;
@@ -202,7 +206,7 @@ function PracticePage() {
     return (
       <View className='page'>
         <View className='finish-container'>
-          <Text className='finish-emoji'>🎉</Text>
+          <Text className='finish-mark'>完成</Text>
           <Text className='finish-title'>
             {total === 0 ? '暂无题目' : '练习完成！'}
           </Text>
@@ -222,8 +226,13 @@ function PracticePage() {
               </View>
             </View>
           )}
-          <View className='btn btn-primary' onClick={handleBack}>
-            <Text className='btn-text'>返回</Text>
+          <View className='finish-actions'>
+            <View className='btn btn-outline' onClick={goHome}>
+              <Text className='btn-text-outline'>回主页</Text>
+            </View>
+            <View className='btn btn-primary' onClick={handleBack}>
+              <Text className='btn-text'>返回</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -240,7 +249,13 @@ function PracticePage() {
   const correctSet = new Set(getCorrectIndicesSorted(question));
 
   return (
-    <ScrollView className='page' scrollY>
+    <View className='practice-root'>
+      <View className='practice-home-fixed'>
+        <Text className='practice-home-btn' onClick={goHome}>
+          ← 回主页
+        </Text>
+      </View>
+      <ScrollView className='page practice-scroll-body' scrollY>
       {/* Progress */}
       <View className='progress-bar'>
         <View
@@ -312,7 +327,7 @@ function PracticePage() {
         <View className='result-section'>
           <View className={`result-banner ${isCorrect ? 'correct' : 'wrong'}`}>
             <Text className='result-banner-text'>
-              {isCorrect ? '✅ 回答正确！' : '❌ 回答错误'}
+              {isCorrect ? '回答正确' : '回答错误'}
             </Text>
           </View>
           <View className='explanation'>
@@ -323,16 +338,16 @@ function PracticePage() {
           {!isCorrect && !aiText && (
             <View className='ai-btn' onClick={handleAI}>
               {aiLoading ? (
-                <Text className='ai-btn-text'>⏳ AI 分析中...</Text>
+                <Text className='ai-btn-text'>分析中…</Text>
               ) : (
-                <Text className='ai-btn-text'>🤖 AI 深度解析</Text>
+                <Text className='ai-btn-text'>AI 深度解析</Text>
               )}
             </View>
           )}
 
           {aiText && (
             <View className='ai-result'>
-              <Text className='ai-result-title'>🤖 AI 解析</Text>
+              <Text className='ai-result-title'>AI 解析</Text>
               <Text className='ai-result-text'>{aiText}</Text>
             </View>
           )}
@@ -346,7 +361,8 @@ function PracticePage() {
           </View>
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 

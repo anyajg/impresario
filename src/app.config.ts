@@ -10,9 +10,9 @@ export default defineAppConfig({
     'pages/aiSettings/index',
   ],
   window: {
-    backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#4F46E5',
+    backgroundTextStyle: 'dark',
+    navigationBarBackgroundColor: '#f8fafc',
     navigationBarTitleText: '演出经纪人练习',
-    navigationBarTextStyle: 'white',
+    navigationBarTextStyle: 'black',
   },
 });

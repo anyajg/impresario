@@ -3,10 +3,10 @@ import Taro from '@tarojs/taro';
 import './index.scss';
 
 const tabs = [
-  { title: '首页', icon: '🏠', path: '/pages/index/index' },
-  { title: '题库', icon: '📚', path: '/pages/practice/index' },
-  { title: '错题', icon: '📋', path: '/pages/wrongBook/index' },
-  { title: '考试', icon: '📝', path: '/pages/exam/index' },
+  { title: '首页', mark: '首', path: '/pages/index/index' },
+  { title: '题库', mark: '练', path: '/pages/practice/index' },
+  { title: '错题', mark: '错', path: '/pages/wrongBook/index' },
+  { title: '考试', mark: '考', path: '/pages/exam/index' },
 ];
 
 interface TabBarProps {
@@ -27,7 +27,7 @@ function TabBar({ current }: TabBarProps) {
           className={`tab-item ${index === current ? 'tab-active' : ''}`}
           onClick={() => handleTap(index)}
         >
-          <Text className='tab-icon'>{tab.icon}</Text>
+          <Text className='tab-icon'>{tab.mark}</Text>
           <Text className='tab-title'>{tab.title}</Text>
         </View>
       ))}

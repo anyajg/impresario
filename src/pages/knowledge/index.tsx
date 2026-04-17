@@ -24,7 +24,7 @@ function KnowledgePage() {
   return (
     <View className='page knowledge-page'>
       <View className='knowledge-hero'>
-        <Text className='knowledge-hero-icon'>📖</Text>
+        <Text className='knowledge-hero-mark'>知</Text>
         <Text className='knowledge-hero-title'>知识点</Text>
         <Text className='knowledge-hero-desc'>
           摘自备考资料《经纪人考试考点》，按章节归类，便于与题库对照复习。

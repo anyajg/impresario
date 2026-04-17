@@ -1,6 +1,7 @@
 .page {
   min-height: 100vh;
   padding-bottom: 60px;
+  background: #f4fbfa;
 }
 
 /* Hero */
@@ -12,8 +13,14 @@
   gap: 12px;
 }
 
-.hero-icon {
-  font-size: 72px;
+.hero-mark {
+  font-size: 22px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.2em;
+  padding: 10px 20px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
 }
 
 .hero-title {
@@ -36,10 +43,9 @@
 
 .field {
   background: #fff;
-  border-radius: 14px;
   padding: 20px 24px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
 }
 
 .field-label {
@@ -87,7 +93,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  background: #0d9488;
 }
 
 .btn-text {
@@ -98,7 +104,7 @@
 
 .btn-outline {
   background: #fff;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #cbd5e1;
 }
 
 .btn-outline-text {

@@ -11,10 +11,10 @@ export {
 } from './questions.types';
 
 export const chapters: Chapter[] = [
-  { id: 1, name: '政策法规', icon: '📜', color: '#3B82F6' },
-  { id: 2, name: '经纪基础', icon: '📚', color: '#10B981' },
-  { id: 3, name: '经纪实务', icon: '💼', color: '#F59E0B' },
-  { id: 4, name: '安全管理', icon: '🛡️', color: '#EF4444' },
+  { id: 1, name: '政策法规', icon: '法', color: '#0d9488' },
+  { id: 2, name: '经纪基础', icon: '基', color: '#0d9488' },
+  { id: 3, name: '经纪实务', icon: '务', color: '#0d9488' },
+  { id: 4, name: '安全管理', icon: '安', color: '#0d9488' },
 ];
 
 const baseQuestions: Question[] = [

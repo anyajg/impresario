@@ -1,6 +1,7 @@
 .page {
   min-height: 100vh;
   padding-bottom: 160px;
+  background: #f4fbfa;
 }
 
 .exam-page {
@@ -19,8 +20,14 @@
   gap: 24px;
 }
 
-.start-emoji {
-  font-size: 96px;
+.start-mark {
+  font-size: 22px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.2em;
+  padding: 10px 20px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
 }
 
 .start-title {
@@ -32,10 +39,9 @@
 .start-rules {
   width: 100%;
   background: #fff;
-  border-radius: 16px;
   padding: 8px 0;
   margin: 16px 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
 }
 
 .rule-item {
@@ -97,6 +103,25 @@
   color: #9ca3af;
 }
 
+.exam-abandon-row {
+  flex-shrink: 0;
+  padding: 6px 24px 12px;
+  background: #fff;
+  border-bottom: 1px solid #f3f4f6;
+  text-align: center;
+}
+
+.exam-abandon-link {
+  font-size: 26px;
+  color: #94a3b8;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.exam-abandon-row:active .exam-abandon-link {
+  opacity: 0.75;
+}
+
 /* ── Exam Body ── */
 .exam-body {
   flex: 1;
@@ -151,7 +176,7 @@
   padding: 24px;
   margin-bottom: 16px;
   border-radius: 14px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid #e2e8f0;
 
   &:active {
     opacity: 0.85;
@@ -159,8 +184,8 @@
 }
 
 .option-selected {
-  border-color: #4f46e5;
-  background: #eef2ff;
+  border-color: #0d9488;
+  background: #ecfeff;
 }
 
 .option-label {
@@ -175,7 +200,7 @@
 }
 
 .option-label-active {
-  background: #4f46e5;
+  background: #0f766e;
 }
 
 .option-label-active .option-label-text {
@@ -200,7 +225,7 @@
   gap: 16px;
   padding: 16px 24px;
   background: #fff;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
 
@@ -221,11 +246,11 @@
 }
 
 .nav-btn-primary {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  background: #0d9488;
 }
 
 .nav-btn-submit {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: #0f766e;
 }
 
 .nav-btn-text {
@@ -278,7 +303,7 @@
 }
 
 .grid-current {
-  background: #4f46e5;
+  background: #0d9488;
 }
 
 .grid-current .grid-item-text {
@@ -286,11 +311,11 @@
 }
 
 .grid-answered {
-  background: #dbeafe;
+  background: #e2e8f0;
 }
 
 .grid-answered .grid-item-text {
-  color: #4f46e5;
+  color: #334155;
 }
 
 /* ── Button ── */
@@ -306,7 +331,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  background: #0d9488;
 }
 
 .btn-text {

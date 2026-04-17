@@ -107,7 +107,7 @@ function WrongBookPage() {
     return (
       <View className='page'>
         <View className='empty'>
-          <Text className='empty-emoji'>🎉</Text>
+          <Text className='empty-mark'>空</Text>
           <Text className='empty-title'>暂无错题</Text>
           <Text className='empty-desc'>继续努力练习吧！</Text>
           <View
@@ -127,16 +127,16 @@ function WrongBookPage() {
       {/* Actions */}
       <View className='actions'>
         <View className='action-btn action-practice' onClick={handlePractice}>
-          <Text className='action-btn-text'>🔄 重做错题</Text>
+          <Text className='action-btn-text'>重做错题</Text>
         </View>
         <View className='action-btn action-clear' onClick={handleClear}>
-          <Text className='action-btn-text'>🗑️ 清空</Text>
+          <Text className='action-btn-text'>清空</Text>
         </View>
       </View>
 
       {/* AI Overall */}
       <View className='ai-overall-btn' onClick={handleAIOverall}>
-        <Text className='ai-overall-btn-text'>🤖 AI 薄弱项诊断</Text>
+        <Text className='ai-overall-btn-text'>薄弱项诊断</Text>
         <Text className='ai-overall-btn-sub'>
           分析 {wrongQuestions.length} 道错题，生成复习建议
         </Text>
@@ -145,7 +145,7 @@ function WrongBookPage() {
       {showReport && (
         <View className='ai-report'>
           <View className='ai-report-header'>
-            <Text className='ai-report-title'>🤖 AI 诊断报告</Text>
+            <Text className='ai-report-title'>诊断报告</Text>
             <Text className='ai-report-close' onClick={() => setShowReport(false)}>
               收起
             </Text>
@@ -210,7 +210,7 @@ function WrongBookPage() {
                       >
                         <Text className='wrong-option-text'>
                           {label}. {opt}
-                          {isAnswer ? ' ✅' : ''}
+                          {isAnswer ? '（正确项）' : ''}
                         </Text>
                       </View>
                     );
@@ -230,16 +230,16 @@ function WrongBookPage() {
                     onClick={() => handleAIQuestion(q)}
                   >
                     {isAILoading ? (
-                      <Text className='ai-btn-text'>⏳ AI 分析中...</Text>
+                      <Text className='ai-btn-text'>分析中…</Text>
                     ) : (
-                      <Text className='ai-btn-text'>🤖 AI 深度解析</Text>
+                      <Text className='ai-btn-text'>AI 深度解析</Text>
                     )}
                   </View>
                 )}
 
                 {hasAI && (
                   <View className='ai-result'>
-                    <Text className='ai-result-title'>🤖 AI 解析</Text>
+                    <Text className='ai-result-title'>AI 解析</Text>
                     <Text className='ai-result-text'>{aiResults[aiKey]}</Text>
                   </View>
                 )}

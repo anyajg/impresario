@@ -1,5 +1,6 @@
 .page {
   min-height: 100vh;
+  background: #f4fbfa;
 }
 
 /* ── Score Header ── */
@@ -12,34 +13,44 @@
 }
 
 .score-header.passed {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  border-top: 3px solid #0d9488;
 }
 
 .score-header.failed {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  border-top: 3px solid #f97316;
 }
 
-.score-emoji {
-  font-size: 72px;
+.score-mark {
+  font-size: 20px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.12em;
+  padding: 8px 18px;
   margin-bottom: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
 }
 
 .score-value {
-  font-size: 96px;
-  font-weight: 800;
-  color: #fff;
+  font-size: 72px;
+  font-weight: 700;
+  color: #0f172a;
   line-height: 1;
 }
 
 .score-label {
   font-size: 28px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #64748b;
 }
 
 .score-status {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
-  color: #fff;
+  color: #334155;
   margin-top: 8px;
 }
 
@@ -48,10 +59,9 @@
   display: flex;
   justify-content: space-around;
   background: #fff;
-  margin: -20px 24px 0;
+  margin: -12px 20px 0;
   padding: 28px 16px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
   position: relative;
   z-index: 1;
 }
@@ -70,11 +80,11 @@
 }
 
 .correct-color {
-  color: #10b981;
+  color: #0d9488;
 }
 
 .wrong-color {
-  color: #ef4444;
+  color: #e11d48;
 }
 
 .result-stat-label {
@@ -96,10 +106,9 @@
 /* ── Detail Card ── */
 .detail-card {
   background: #fff;
-  margin: 0 24px 12px;
+  margin: 0 20px 12px;
   padding: 20px 24px;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  border: 1px solid #e2e8f0;
 }
 
 .detail-header {
@@ -120,11 +129,11 @@
 }
 
 .detail-status.correct {
-  color: #10b981;
+  color: #0d9488;
 }
 
 .detail-status.wrong {
-  color: #ef4444;
+  color: #e11d48;
 }
 
 .detail-index {
@@ -143,7 +152,7 @@
 }
 
 .detail-tag-multi {
-  background: #6366f1;
+  background: #0f766e;
 }
 
 .detail-question {
@@ -161,19 +170,20 @@
 
 .detail-user-answer {
   font-size: 24px;
-  color: #ef4444;
+  color: #e11d48;
 }
 
 .detail-correct-answer {
   font-size: 24px;
-  color: #10b981;
+  color: #0f766e;
 }
 
 .detail-explanation {
   margin-top: 12px;
   padding: 12px 16px;
-  background: #eef2ff;
-  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #0d9488;
 }
 
 .detail-explanation-text {
@@ -201,7 +211,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  background: #0d9488;
 }
 
 .btn-text {
@@ -212,7 +222,7 @@
 
 .btn-outline {
   background: #fff;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #cbd5e1;
 }
 
 .btn-outline-text {

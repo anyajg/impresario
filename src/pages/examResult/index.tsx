@@ -51,7 +51,7 @@ function ExamResultPage() {
     <ScrollView className='page' scrollY>
       {/* Score Header */}
       <View className={`score-header ${passed ? 'passed' : 'failed'}`}>
-        <Text className='score-emoji'>{passed ? '🎉' : '💪'}</Text>
+        <Text className='score-mark'>{passed ? '通过' : '未过'}</Text>
         <Text className='score-value'>{result.score}</Text>
         <Text className='score-label'>分</Text>
         <Text className='score-status'>

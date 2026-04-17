@@ -31,9 +31,15 @@ function IndexPage() {
     <View className='page'>
       {/* Header */}
       <View className='header'>
-        <Text className='header-icon'>🎭</Text>
-        <Text className='header-title'>演出经纪人考试练习</Text>
-        <Text className='header-desc'>系统学习 · 高效备考</Text>
+        <View className='header-row'>
+          <View className='header-mark'>
+            <Text>演</Text>
+          </View>
+          <View className='header-text'>
+            <Text className='header-title'>演出经纪人考试练习</Text>
+            <Text className='header-desc'>题库与知识点，便于系统复习</Text>
+          </View>
+        </View>
       </View>
 
       {/* Stats */}
@@ -69,8 +75,8 @@ function IndexPage() {
         onClick={() => Taro.redirectTo({ url: '/pages/practice/index' })}
       >
         <View className='card-left'>
-          <View className='card-icon' style={{ background: '#EEF2FF' }}>
-            <Text>📚</Text>
+          <View className='card-icon'>
+            <Text className='card-icon-letter'>练</Text>
           </View>
           <View className='card-info'>
             <Text className='card-title'>章节练习</Text>
@@ -85,8 +91,8 @@ function IndexPage() {
         onClick={() => Taro.navigateTo({ url: '/pages/knowledge/index' })}
       >
         <View className='card-left'>
-          <View className='card-icon' style={{ background: '#ECFEFF' }}>
-            <Text>📖</Text>
+          <View className='card-icon'>
+            <Text className='card-icon-letter'>知</Text>
           </View>
           <View className='card-info'>
             <Text className='card-title'>知识点</Text>
@@ -101,8 +107,8 @@ function IndexPage() {
         onClick={() => Taro.redirectTo({ url: '/pages/wrongBook/index' })}
       >
         <View className='card-left'>
-          <View className='card-icon' style={{ background: '#FEF2F2' }}>
-            <Text>❌</Text>
+          <View className='card-icon'>
+            <Text className='card-icon-letter'>错</Text>
           </View>
           <View className='card-info'>
             <Text className='card-title'>错题本</Text>
@@ -119,8 +125,8 @@ function IndexPage() {
         onClick={() => Taro.redirectTo({ url: '/pages/exam/index' })}
       >
         <View className='card-left'>
-          <View className='card-icon' style={{ background: '#F0FDF4' }}>
-            <Text>📝</Text>
+          <View className='card-icon'>
+            <Text className='card-icon-letter'>考</Text>
           </View>
           <View className='card-info'>
             <Text className='card-title'>模拟考试</Text>
@@ -138,8 +144,8 @@ function IndexPage() {
         onClick={() => Taro.navigateTo({ url: '/pages/aiSettings/index' })}
       >
         <View className='card-left'>
-          <View className='card-icon' style={{ background: '#F5F3FF' }}>
-            <Text>🤖</Text>
+          <View className='card-icon'>
+            <Text className='card-icon-letter'>析</Text>
           </View>
           <View className='card-info'>
             <Text className='card-title'>AI 智能解析</Text>

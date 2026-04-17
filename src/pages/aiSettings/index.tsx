@@ -67,7 +67,7 @@ function AISettingsPage() {
   return (
     <View className='page'>
       <View className='hero'>
-        <Text className='hero-icon'>🤖</Text>
+        <Text className='hero-mark'>置</Text>
         <Text className='hero-title'>AI 解析设置</Text>
         <Text className='hero-desc'>
           配置 AI 接口后，可在错题本和练习中获取智能解析

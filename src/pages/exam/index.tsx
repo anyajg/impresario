@@ -124,6 +124,28 @@ function ExamPage() {
     }
   };
 
+  const confirmAbandonExam = () => {
+    Taro.showModal({
+      title: '放弃考试',
+      content: '确定放弃本次模拟考试并返回首页吗？当前进度不会保存，也不会生成成绩。',
+      confirmText: '确定放弃',
+      cancelText: '继续答题',
+      success(res) {
+        if (!res.confirm) return;
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        setStarted(false);
+        setExamQuestions([]);
+        setAnswers({});
+        setCurrentIndex(0);
+        setTimeLeft(EXAM_TIME);
+        Taro.redirectTo({ url: '/pages/index/index' });
+      },
+    });
+  };
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -135,7 +157,7 @@ function ExamPage() {
     return (
       <View className='page'>
         <View className='start-container'>
-          <Text className='start-emoji'>📝</Text>
+          <Text className='start-mark'>考</Text>
           <Text className='start-title'>模拟考试</Text>
           <View className='start-rules'>
             <View className='rule-item'>
@@ -179,9 +201,15 @@ function ExamPage() {
     <View className='page exam-page'>
       {/* Timer Bar */}
       <View className={`timer-bar ${isUrgent ? 'urgent' : ''}`}>
-        <Text className='timer-text'>⏱ {formatTime(timeLeft)}</Text>
+        <Text className='timer-text'>{formatTime(timeLeft)}</Text>
         <Text className='timer-progress'>
           已答 {answeredCount}/{examQuestions.length}
+        </Text>
+      </View>
+
+      <View className='exam-abandon-row'>
+        <Text className='exam-abandon-link' onClick={confirmAbandonExam}>
+          放弃考试 · 回主页
         </Text>
       </View>
 
