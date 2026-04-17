@@ -358,13 +358,6 @@ const baseQuestions: Question[] = [
   },
 ];
 
-// 小程序主包/分包体积限制严格（单包 2MB），超大自动题库仅在 H5 端启用。
-let platformAutoQuestions: Question[] = [];
-if (process.env.TARO_ENV !== 'weapp') {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
-  platformAutoQuestions = require('./questions.auto').autoQuestions as Question[];
-}
-
 const AUTO_START_ID = 118;
 const FULL_QUESTION_BANK_URL =
   'https://raw.githubusercontent.com/anyajg/impresario/main/src/data/questions.auto.json';
@@ -373,7 +366,6 @@ export const TRIAL_QUESTION_LIMIT = 30;
 export const questions: Question[] = [
   ...baseQuestions,
   ...importedQuestions,
-  ...platformAutoQuestions,
 ];
 
 type AutoJsonRoot = {
@@ -390,7 +382,7 @@ type AutoJsonRoot = {
   }>;
 };
 
-let fullBankLoaded = process.env.TARO_ENV !== 'weapp' || platformAutoQuestions.length > 0;
+let fullBankLoaded = false;
 let loadingPromise: Promise<boolean> | null = null;
 
 function mapAutoItemsToQuestions(root: AutoJsonRoot): Question[] {
@@ -428,7 +420,6 @@ export function getAvailableQuestionCount(): number {
 
 export async function ensureFullQuestionBankLoaded(): Promise<boolean> {
   if (fullBankLoaded) return true;
-  if (process.env.TARO_ENV !== 'weapp') return true;
   if (!isInviteUnlocked()) return true;
   if (loadingPromise) return loadingPromise;
 
