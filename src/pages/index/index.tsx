@@ -1,7 +1,12 @@
 import { View, Text } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useState } from 'react';
-import { questions, chapters, getQuestionsByChapter } from '../../data/questions';
+import {
+  questions,
+  chapters,
+  getQuestionsByChapter,
+  ensureFullQuestionBankLoaded,
+} from '../../data/questions';
 import { getStats, getWrongIds, getExamHistory } from '../../utils/storage';
 import { isAIConfigured } from '../../utils/ai';
 import TabBar from '../../components/TabBar';
@@ -13,8 +18,10 @@ function IndexPage() {
   const [wrongCount, setWrongCount] = useState(0);
   const [examCount, setExamCount] = useState(0);
   const [aiReady, setAiReady] = useState(false);
+  const [questionCount, setQuestionCount] = useState(questions.length);
 
-  useDidShow(() => {
+  useDidShow(async () => {
+    await ensureFullQuestionBankLoaded();
     const stats = getStats();
     setTotalAnswered(stats.totalAnswered);
     setCorrectRate(
@@ -25,6 +32,7 @@ function IndexPage() {
     setWrongCount(getWrongIds().length);
     setExamCount(getExamHistory().length);
     setAiReady(isAIConfigured());
+    setQuestionCount(questions.length);
   });
 
   return (
@@ -45,7 +53,7 @@ function IndexPage() {
       {/* Stats */}
       <View className='stats-row'>
         <View className='stat-item'>
-          <Text className='stat-value'>{questions.length}</Text>
+          <Text className='stat-value'>{questionCount}</Text>
           <Text className='stat-label'>总题数</Text>
         </View>
         <View className='stat-divider' />

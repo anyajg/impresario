@@ -7,6 +7,10 @@ const h5Basename =
 
 /** 与 H5 分离，避免 `build:weapp` 覆盖 `dist`（影响 Pages / Vercel） */
 const outputRoot = process.env.TARO_ENV === 'weapp' ? 'dist-weapp' : 'dist';
+const copyPatterns =
+  process.env.TARO_ENV === 'weapp'
+    ? [{ from: 'src/sitemap.json', to: 'sitemap.json' }]
+    : [];
 
 export default defineConfig<'vite'>({
   projectName: 'impresario',
@@ -26,7 +30,7 @@ export default defineConfig<'vite'>({
   ],
   defineConstants: {},
   copy: {
-    patterns: [{ from: 'src/sitemap.json', to: 'sitemap.json' }],
+    patterns: copyPatterns,
     options: {}
   },
   framework: 'react',

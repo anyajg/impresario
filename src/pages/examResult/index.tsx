@@ -7,6 +7,7 @@ import {
   isMultiQuestion,
   getCorrectIndicesSorted,
   isSelectionCorrect,
+  ensureFullQuestionBankLoaded,
 } from '../../data/questions';
 import {
   getExamResult,
@@ -30,8 +31,12 @@ function ExamResultPage() {
   const [result, setResult] = useState<ExamResult | null>(null);
 
   useEffect(() => {
-    const r = getExamResult();
-    setResult(r);
+    const load = async () => {
+      await ensureFullQuestionBankLoaded();
+      const r = getExamResult();
+      setResult(r);
+    };
+    load();
   }, []);
 
   if (!result) return null;

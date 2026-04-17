@@ -8,6 +8,7 @@ import {
   isMultiQuestion,
   getCorrectIndicesSorted,
   isSelectionCorrect,
+  ensureFullQuestionBankLoaded,
   type Question,
 } from '../../data/questions';
 import {
@@ -40,8 +41,11 @@ function PracticePage() {
   const [finished, setFinished] = useState(false);
   const [aiText, setAiText] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+  const [, setQuestionCount] = useState(allQuestions.length);
 
-  useDidShow(() => {
+  useDidShow(async () => {
+    await ensureFullQuestionBankLoaded();
+    setQuestionCount(allQuestions.length);
     if (modeParam === 'wrong') {
       const wrongIds = getWrongIds();
       const qs = allQuestions.filter((q) => wrongIds.includes(q.id));

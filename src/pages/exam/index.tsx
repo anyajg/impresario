@@ -6,6 +6,7 @@ import {
   chapters,
   isMultiQuestion,
   isSelectionCorrect,
+  ensureFullQuestionBankLoaded,
   type Question,
 } from '../../data/questions';
 import { saveExamResult } from '../../utils/storage';
@@ -22,6 +23,7 @@ function ExamPage() {
   /** 单选存 number；多选存已选下标数组 */
   const [answers, setAnswers] = useState<Record<number, number | number[]>>({});
   const [timeLeft, setTimeLeft] = useState(EXAM_TIME);
+  const [bankLoading, setBankLoading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
 
@@ -31,7 +33,16 @@ function ExamPage() {
     };
   }, []);
 
-  const startExam = useCallback(() => {
+  const startExam = useCallback(async () => {
+    setBankLoading(true);
+    const ok = await ensureFullQuestionBankLoaded();
+    setBankLoading(false);
+    if (!ok) {
+      Taro.showToast({
+        title: '完整版题库加载失败，已使用内置题库',
+        icon: 'none',
+      });
+    }
     const qs = getRandomQuestions(EXAM_COUNT);
     setExamQuestions(qs);
     setAnswers({});
@@ -181,7 +192,7 @@ function ExamPage() {
             开始后将自动计时，到时间将自动交卷
           </Text>
           <View className='btn btn-primary' onClick={startExam}>
-            <Text className='btn-text'>开始考试</Text>
+            <Text className='btn-text'>{bankLoading ? '加载题库中…' : '开始考试'}</Text>
           </View>
         </View>
         <TabBar current={3} />

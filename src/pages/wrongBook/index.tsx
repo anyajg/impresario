@@ -5,6 +5,7 @@ import {
   questions,
   chapters,
   getCorrectIndicesSorted,
+  ensureFullQuestionBankLoaded,
   type Question,
 } from '../../data/questions';
 import { getWrongIds, clearWrongIds, removeWrongId } from '../../utils/storage';
@@ -26,7 +27,8 @@ function WrongBookPage() {
   const [overallReport, setOverallReport] = useState('');
   const [showReport, setShowReport] = useState(false);
 
-  const loadData = useCallback(() => {
+  const loadData = useCallback(async () => {
+    await ensureFullQuestionBankLoaded();
     const ids = getWrongIds();
     const qs = questions.filter((q) => ids.includes(q.id));
     setWrongQuestions(qs);

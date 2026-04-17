@@ -1,4 +1,5 @@
 import type { Chapter, Question } from './questions.types';
+import Taro from '@tarojs/taro';
 import { importedQuestions } from './questions.imported';
 
 export type { Chapter, Question, QuestionChoiceType } from './questions.types';
@@ -363,11 +364,93 @@ if (process.env.TARO_ENV !== 'weapp') {
   platformAutoQuestions = require('./questions.auto').autoQuestions as Question[];
 }
 
+const AUTO_START_ID = 118;
+const FULL_QUESTION_BANK_URL =
+  'https://raw.githubusercontent.com/anyajg/impresario/main/src/data/questions.auto.json';
+
 export const questions: Question[] = [
   ...baseQuestions,
   ...importedQuestions,
   ...platformAutoQuestions,
 ];
+
+type AutoJsonRoot = {
+  version: number;
+  count: number;
+  items: Array<{
+    chapter: number;
+    type: 'single' | 'multi';
+    content: string;
+    options: string[];
+    answer: number | number[];
+    explanation: string;
+    source: string;
+  }>;
+};
+
+let fullBankLoaded = process.env.TARO_ENV !== 'weapp' || platformAutoQuestions.length > 0;
+let loadingPromise: Promise<boolean> | null = null;
+
+function mapAutoItemsToQuestions(root: AutoJsonRoot): Question[] {
+  return root.items.map((it, i) => ({
+    id: AUTO_START_ID + i,
+    chapter: it.chapter,
+    ...(it.type === 'multi' ? { type: 'multi' as const } : {}),
+    content: it.content,
+    options: it.options,
+    answer: it.answer,
+    explanation: it.explanation.includes('【来源】')
+      ? it.explanation
+      : `${it.explanation}\n\n【来源】${it.source}`,
+  }));
+}
+
+function mergeQuestionBank(auto: Question[]) {
+  questions.splice(
+    0,
+    questions.length,
+    ...baseQuestions,
+    ...importedQuestions,
+    ...auto
+  );
+}
+
+export async function ensureFullQuestionBankLoaded(): Promise<boolean> {
+  if (fullBankLoaded) return true;
+  if (process.env.TARO_ENV !== 'weapp') return true;
+  if (loadingPromise) return loadingPromise;
+
+  loadingPromise = new Promise((resolve) => {
+    Taro.request({
+      url: FULL_QUESTION_BANK_URL,
+      method: 'GET',
+      timeout: 15000,
+      success(res) {
+        try {
+          const root = res.data as AutoJsonRoot;
+          if (!root?.items?.length) {
+            resolve(false);
+            return;
+          }
+          const auto = mapAutoItemsToQuestions(root);
+          mergeQuestionBank(auto);
+          fullBankLoaded = true;
+          resolve(true);
+        } catch {
+          resolve(false);
+        }
+      },
+      fail() {
+        resolve(false);
+      },
+      complete() {
+        loadingPromise = null;
+      },
+    });
+  });
+
+  return loadingPromise;
+}
 
 export function getQuestionsByChapter(chapterId: number): Question[] {
   return questions.filter((q) => q.chapter === chapterId);
