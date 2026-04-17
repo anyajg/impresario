@@ -82,6 +82,22 @@ function IndexPage() {
 
       <View
         className='card'
+        onClick={() => Taro.navigateTo({ url: '/pages/knowledge/index' })}
+      >
+        <View className='card-left'>
+          <View className='card-icon' style={{ background: '#ECFEFF' }}>
+            <Text>📖</Text>
+          </View>
+          <View className='card-info'>
+            <Text className='card-title'>知识点</Text>
+            <Text className='card-desc'>法规、舞台、经纪实务等纲要精读</Text>
+          </View>
+        </View>
+        <Text className='card-arrow'>›</Text>
+      </View>
+
+      <View
+        className='card'
         onClick={() => Taro.redirectTo({ url: '/pages/wrongBook/index' })}
       >
         <View className='card-left'>

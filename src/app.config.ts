@@ -1,6 +1,8 @@
 export default defineAppConfig({
   pages: [
     'pages/index/index',
+    'pages/knowledge/index',
+    'pages/knowledge/detail',
     'pages/practice/index',
     'pages/wrongBook/index',
     'pages/exam/index',

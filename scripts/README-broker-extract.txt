@@ -10,3 +10,7 @@ build_auto_questions.py — 递归处理备考目录下全部 .pdf / .docx / .do
   python3 scripts/build_auto_questions.py --root "/Users/FIRE_1/Documents/经纪人备考" --out-json src/data/questions.auto.json --cache-dir broker-extracted-full
   # 可选：对 textutil 过短的 docx 再跑 OCR（很慢）
   python3 scripts/build_auto_questions.py --root "..." --out-json src/data/questions.auto.json --ocr-docx
+
+build_knowledge_json.py — 合并「经纪人考试考点.docx」+ 备考根目录下 PDF 讲义 → src/data/knowledge.json（首页「知识点」）。自动跳过明显模考/题库 PDF；可 --max-articles / --no-pdf / --no-docx。
+  python3 scripts/build_knowledge_json.py
+  python3 scripts/build_knowledge_json.py --root "/Users/…/经纪人备考" --max-articles 3000
