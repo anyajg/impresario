@@ -1,7 +1,13 @@
 import { View, Text, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getRandomQuestions, chapters, type Question } from '../../data/questions';
+import {
+  getRandomQuestions,
+  chapters,
+  isMultiQuestion,
+  isSelectionCorrect,
+  type Question,
+} from '../../data/questions';
 import { saveExamResult } from '../../utils/storage';
 import TabBar from '../../components/TabBar';
 import './index.scss';
@@ -13,7 +19,8 @@ function ExamPage() {
   const [started, setStarted] = useState(false);
   const [examQuestions, setExamQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
+  /** 单选存 number；多选存已选下标数组 */
+  const [answers, setAnswers] = useState<Record<number, number | number[]>>({});
   const [timeLeft, setTimeLeft] = useState(EXAM_TIME);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
@@ -51,8 +58,18 @@ function ExamPage() {
     }
   }, [timeLeft, started]);
 
-  const handleSelect = (questionId: number, optionIndex: number) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: optionIndex }));
+  const handleSelectOption = (q: Question, optionIndex: number) => {
+    if (isMultiQuestion(q)) {
+      setAnswers((prev) => {
+        const cur = (prev[q.id] as number[] | undefined) ?? [];
+        const s = new Set(cur);
+        if (s.has(optionIndex)) s.delete(optionIndex);
+        else s.add(optionIndex);
+        return { ...prev, [q.id]: [...s].sort((a, b) => a - b) };
+      });
+    } else {
+      setAnswers((prev) => ({ ...prev, [q.id]: optionIndex }));
+    }
   };
 
   const handleSubmit = useCallback(() => {
@@ -60,12 +77,16 @@ function ExamPage() {
 
     const duration = Math.round((Date.now() - startTimeRef.current) / 1000);
     let correctCount = 0;
-    const answerRecord: Record<string, number> = {};
+    const answerRecord: Record<string, number | number[]> = {};
 
     examQuestions.forEach((q) => {
       const userAnswer = answers[q.id];
-      answerRecord[String(q.id)] = userAnswer ?? -1;
-      if (userAnswer === q.answer) correctCount++;
+      if (userAnswer === undefined) {
+        answerRecord[String(q.id)] = -1;
+      } else {
+        answerRecord[String(q.id)] = userAnswer;
+      }
+      if (isSelectionCorrect(userAnswer ?? null, q)) correctCount++;
     });
 
     const result = {
@@ -82,7 +103,8 @@ function ExamPage() {
   }, [examQuestions, answers]);
 
   const confirmSubmit = () => {
-    const unanswered = examQuestions.length - Object.keys(answers).length;
+    const n = examQuestions.filter((q) => answers[q.id] !== undefined).length;
+    const unanswered = examQuestions.length - n;
     if (unanswered > 0) {
       Taro.showModal({
         title: '确认交卷',
@@ -149,7 +171,7 @@ function ExamPage() {
   const question = examQuestions[currentIndex];
   if (!question) return null;
 
-  const answeredCount = Object.keys(answers).length;
+  const answeredCount = examQuestions.filter((q) => answers[q.id] !== undefined).length;
   const chapterInfo = chapters.find((c) => c.id === question.chapter);
   const isUrgent = timeLeft <= 300;
 
@@ -185,12 +207,15 @@ function ExamPage() {
         <View className='options'>
           {question.options.map((opt, idx) => {
             const label = String.fromCharCode(65 + idx);
-            const selected = answers[question.id] === idx;
+            const raw = answers[question.id];
+            const selected = isMultiQuestion(question)
+              ? Array.isArray(raw) && raw.includes(idx)
+              : raw === idx;
             return (
               <View
                 key={idx}
                 className={`option ${selected ? 'option-selected' : ''}`}
-                onClick={() => handleSelect(question.id, idx)}
+                onClick={() => handleSelectOption(question, idx)}
               >
                 <View
                   className={`option-label ${selected ? 'option-label-active' : ''}`}

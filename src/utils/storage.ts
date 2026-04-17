@@ -10,11 +10,14 @@ export interface PracticeStats {
   correctCount: number;
 }
 
+/** 单选存单个下标；多选存已选下标数组（与题目顺序无关，结果页用 isSelectionCorrect 判分） */
+export type ExamStoredAnswer = number | number[];
+
 export interface ExamResult {
   score: number;
   total: number;
   correctCount: number;
-  answers: Record<string, number>;
+  answers: Record<string, ExamStoredAnswer>;
   date: string;
   duration: number;
 }

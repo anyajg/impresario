@@ -1,18 +1,14 @@
-export interface Question {
-  id: number;
-  chapter: number;
-  content: string;
-  options: string[];
-  answer: number;
-  explanation: string;
-}
+import type { Chapter, Question } from './questions.types';
+import { autoQuestions } from './questions.auto';
+import { importedQuestions } from './questions.imported';
 
-export interface Chapter {
-  id: number;
-  name: string;
-  icon: string;
-  color: string;
-}
+export type { Chapter, Question, QuestionChoiceType } from './questions.types';
+export {
+  isMultiQuestion,
+  getCorrectIndicesSorted,
+  normalizeUserSelection,
+  isSelectionCorrect,
+} from './questions.types';
 
 export const chapters: Chapter[] = [
   { id: 1, name: '政策法规', icon: '📜', color: '#3B82F6' },
@@ -21,7 +17,7 @@ export const chapters: Chapter[] = [
   { id: 4, name: '安全管理', icon: '🛡️', color: '#EF4444' },
 ];
 
-export const questions: Question[] = [
+const baseQuestions: Question[] = [
   // ── Chapter 1: 政策法规 ──
   {
     id: 1,
@@ -360,6 +356,8 @@ export const questions: Question[] = [
     explanation: '演出场所应定期检查维护消防设施器材，确保其处于正常使用状态，能在紧急情况下有效使用。',
   },
 ];
+
+export const questions: Question[] = [...baseQuestions, ...importedQuestions, ...autoQuestions];
 
 export function getQuestionsByChapter(chapterId: number): Question[] {
   return questions.filter((q) => q.chapter === chapterId);

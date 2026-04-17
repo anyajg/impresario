@@ -4,6 +4,9 @@ dist
 .idea
 .DS_Store
 .swc
+**/__pycache__
+broker-extracted-full
+broker-extracted-sample
 npm-debug.log*
 yarn-error.log*
 pnpm-lock.yaml

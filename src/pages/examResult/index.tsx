@@ -1,9 +1,30 @@
 import { View, Text, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useState, useEffect } from 'react';
-import { getQuestionById, chapters } from '../../data/questions';
-import { getExamResult, type ExamResult } from '../../utils/storage';
+import {
+  getQuestionById,
+  chapters,
+  isMultiQuestion,
+  getCorrectIndicesSorted,
+  isSelectionCorrect,
+} from '../../data/questions';
+import {
+  getExamResult,
+  type ExamResult,
+  type ExamStoredAnswer,
+} from '../../utils/storage';
 import './index.scss';
+
+function labelsForIndices(q: { options: string[] }, indices: number[]): string {
+  return indices
+    .map((i) => `${String.fromCharCode(65 + i)}. ${q.options[i]}`)
+    .join('；');
+}
+
+function parseExamUserAnswer(raw: ExamStoredAnswer): number | number[] | null {
+  if (raw === -1) return null;
+  return raw;
+}
 
 function ExamResultPage() {
   const [result, setResult] = useState<ExamResult | null>(null);
@@ -20,9 +41,9 @@ function ExamResultPage() {
   const seconds = result.duration % 60;
 
   const questionDetails = Object.entries(result.answers).map(
-    ([idStr, userAnswer]) => {
+    ([idStr, userAnswerRaw]) => {
       const q = getQuestionById(Number(idStr));
-      return { question: q, userAnswer };
+      return { question: q, userAnswer: parseExamUserAnswer(userAnswerRaw) };
     }
   );
 
@@ -71,8 +92,11 @@ function ExamResultPage() {
 
       {questionDetails.map(({ question: q, userAnswer }, idx) => {
         if (!q) return null;
-        const isCorrect = userAnswer === q.answer;
+        const isCorrect = isSelectionCorrect(userAnswer, q);
         const ch = chapters.find((c) => c.id === q.chapter);
+        const correctIdx = getCorrectIndicesSorted(q);
+        const correctText = labelsForIndices(q, correctIdx);
+        const unanswered = userAnswer === null;
 
         return (
           <View key={q.id} className='detail-card'>
@@ -82,6 +106,11 @@ function ExamResultPage() {
                   {isCorrect ? '✓' : '✗'}
                 </Text>
                 <Text className='detail-index'>第 {idx + 1} 题</Text>
+                {isMultiQuestion(q) && (
+                  <View className='detail-tag detail-tag-multi'>
+                    <Text className='detail-tag-text'>多选</Text>
+                  </View>
+                )}
                 {ch && (
                   <View className='detail-tag' style={{ background: ch.color }}>
                     <Text className='detail-tag-text'>{ch.name}</Text>
@@ -91,18 +120,19 @@ function ExamResultPage() {
             </View>
             <Text className='detail-question'>{q.content}</Text>
             <View className='detail-answers'>
-              {!isCorrect && userAnswer >= 0 && (
+              {!isCorrect && !unanswered && (
                 <Text className='detail-user-answer'>
-                  你的答案：{String.fromCharCode(65 + userAnswer)}.{' '}
-                  {q.options[userAnswer]}
+                  你的答案：
+                  {Array.isArray(userAnswer)
+                    ? labelsForIndices(q, userAnswer)
+                    : `${String.fromCharCode(65 + userAnswer)}. ${q.options[userAnswer]}`}
                 </Text>
               )}
-              {!isCorrect && userAnswer < 0 && (
+              {!isCorrect && unanswered && (
                 <Text className='detail-user-answer'>未作答</Text>
               )}
               <Text className='detail-correct-answer'>
-                正确答案：{String.fromCharCode(65 + q.answer)}.{' '}
-                {q.options[q.answer]}
+                正确答案：{correctText}
               </Text>
             </View>
             {!isCorrect && (

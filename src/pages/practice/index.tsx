@@ -5,6 +5,9 @@ import {
   chapters,
   getQuestionsByChapter,
   questions as allQuestions,
+  isMultiQuestion,
+  getCorrectIndicesSorted,
+  isSelectionCorrect,
   type Question,
 } from '../../data/questions';
 import {
@@ -30,7 +33,8 @@ function PracticePage() {
   );
   const [practiceQuestions, setPracticeQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  /** 单选为单元素数组、多选为已选下标；提交前多选可多次点选切换 */
+  const [picked, setPicked] = useState<number[]>([]);
   const [answered, setAnswered] = useState(false);
   const [correctInSession, setCorrectInSession] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -54,7 +58,7 @@ function PracticePage() {
     const qs = getQuestionsByChapter(chapterId);
     setPracticeQuestions(qs);
     setCurrentIndex(0);
-    setSelectedOption(null);
+    setPicked([]);
     setAnswered(false);
     setCorrectInSession(0);
     setFinished(false);
@@ -62,16 +66,12 @@ function PracticePage() {
     setAiLoading(false);
   }, []);
 
-  const handleSelect = useCallback(
-    (optionIndex: number) => {
-      if (answered) return;
-      setSelectedOption(optionIndex);
-      setAnswered(true);
-
+  const finalizeAnswer = useCallback(
+    (indices: number[]) => {
       const question = practiceQuestions[currentIndex];
-      const isCorrect = optionIndex === question.answer;
+      const isCorrect = isSelectionCorrect(indices, question);
+      setAnswered(true);
       recordAnswer(isCorrect);
-
       if (isCorrect) {
         setCorrectInSession((prev) => prev + 1);
         removeWrongId(question.id);
@@ -79,15 +79,44 @@ function PracticePage() {
         addWrongId(question.id);
       }
     },
-    [answered, practiceQuestions, currentIndex]
+    [practiceQuestions, currentIndex]
   );
+
+  const handleSelectSingle = useCallback(
+    (optionIndex: number) => {
+      if (answered) return;
+      setPicked([optionIndex]);
+      finalizeAnswer([optionIndex]);
+    },
+    [answered, finalizeAnswer]
+  );
+
+  const handleToggleMulti = useCallback(
+    (optionIndex: number) => {
+      if (answered) return;
+      setPicked((prev) => {
+        const s = new Set(prev);
+        if (s.has(optionIndex)) s.delete(optionIndex);
+        else s.add(optionIndex);
+        return [...s].sort((a, b) => a - b);
+      });
+    },
+    [answered]
+  );
+
+  const handleSubmitMulti = useCallback(() => {
+    if (answered) return;
+    const question = practiceQuestions[currentIndex];
+    if (!isMultiQuestion(question)) return;
+    finalizeAnswer(picked);
+  }, [answered, practiceQuestions, currentIndex, picked, finalizeAnswer]);
 
   const handleNext = useCallback(() => {
     if (currentIndex + 1 >= practiceQuestions.length) {
       setFinished(true);
     } else {
       setCurrentIndex((prev) => prev + 1);
-      setSelectedOption(null);
+      setPicked([]);
       setAnswered(false);
       setAiText('');
       setAiLoading(false);
@@ -101,7 +130,7 @@ function PracticePage() {
       setCurrentChapter(null);
       setFinished(false);
       setCurrentIndex(0);
-      setSelectedOption(null);
+      setPicked([]);
       setAnswered(false);
       setCorrectInSession(0);
       setAiText('');
@@ -112,18 +141,21 @@ function PracticePage() {
     if (!ensureAIConfigured()) return;
     if (aiText || aiLoading) return;
     const q = practiceQuestions[currentIndex];
-    if (!q || selectedOption === null) return;
+    if (!q || picked.length === 0) return;
 
     setAiLoading(true);
     try {
-      const result = await aiAnalyzeQuestion(q, selectedOption);
+      const result = await aiAnalyzeQuestion(
+        q,
+        isMultiQuestion(q) ? picked : picked[0]!
+      );
       setAiText(result);
     } catch (e: any) {
       Taro.showToast({ title: e.message || 'AI 请求失败', icon: 'none' });
     } finally {
       setAiLoading(false);
     }
-  }, [practiceQuestions, currentIndex, selectedOption, aiText, aiLoading]);
+  }, [practiceQuestions, currentIndex, picked, aiText, aiLoading]);
 
   // ── Chapter Selection (Tab 主页模式) ──
   if (!currentChapter && modeParam !== 'wrong') {
@@ -202,8 +234,10 @@ function PracticePage() {
   const question = practiceQuestions[currentIndex];
   if (!question) return null;
 
-  const isCorrect = selectedOption === question.answer;
+  const isCorrect = answered && isSelectionCorrect(picked, question);
   const chapterInfo = chapters.find((c) => c.id === question.chapter);
+  const multi = isMultiQuestion(question);
+  const correctSet = new Set(getCorrectIndicesSorted(question));
 
   return (
     <ScrollView className='page' scrollY>
@@ -238,17 +272,25 @@ function PracticePage() {
       <View className='options'>
         {question.options.map((opt, idx) => {
           const optionLabel = String.fromCharCode(65 + idx);
+          const inPick = picked.includes(idx);
           let cls = 'option';
           if (answered) {
-            if (idx === question.answer) cls += ' option-correct';
-            else if (idx === selectedOption) cls += ' option-wrong';
+            const isCorr = correctSet.has(idx);
+            if (isCorr) cls += ' option-correct';
+            else if (inPick) cls += ' option-wrong';
             else cls += ' option-disabled';
-          } else if (idx === selectedOption) {
+          } else if (inPick) {
             cls += ' option-selected';
           }
 
           return (
-            <View key={idx} className={cls} onClick={() => handleSelect(idx)}>
+            <View
+              key={idx}
+              className={cls}
+              onClick={() =>
+                multi ? handleToggleMulti(idx) : handleSelectSingle(idx)
+              }
+            >
               <View className='option-label'>
                 <Text className='option-label-text'>{optionLabel}</Text>
               </View>
@@ -257,6 +299,14 @@ function PracticePage() {
           );
         })}
       </View>
+
+      {!answered && multi && (
+        <View className='multi-submit-wrap'>
+          <View className='btn btn-primary' onClick={handleSubmitMulti}>
+            <Text className='btn-text'>提交答案</Text>
+          </View>
+        </View>
+      )}
 
       {answered && (
         <View className='result-section'>

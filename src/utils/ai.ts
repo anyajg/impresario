@@ -1,6 +1,10 @@
 import Taro from '@tarojs/taro';
 import type { Question } from '../data/questions';
-import { chapters } from '../data/questions';
+import {
+  chapters,
+  getCorrectIndicesSorted,
+  isMultiQuestion,
+} from '../data/questions';
 
 // ── Config ──
 
@@ -109,26 +113,52 @@ async function chatCompletion(systemPrompt: string, userPrompt: string): Promise
 const SYSTEM_PROMPT =
   '你是一位资深的演出经纪人资格考试辅导老师，擅长深入浅出地讲解知识点。请用简洁、清晰的中文回答。';
 
-function buildQuestionPrompt(q: Question, userAnswer: number): string {
+function indicesToLetters(indices: number[]): string {
+  return indices.map((i) => String.fromCharCode(65 + i)).join('、');
+}
+
+function buildQuestionPrompt(
+  q: Question,
+  userAnswer: number | number[] | null
+): string {
   const options = q.options
     .map((opt, i) => `${String.fromCharCode(65 + i)}. ${opt}`)
     .join('\n');
   const ch = chapters.find((c) => c.id === q.chapter);
-  const userLabel = userAnswer >= 0 ? String.fromCharCode(65 + userAnswer) : '未作答';
-  const correctLabel = String.fromCharCode(65 + q.answer);
+  const correctIdx = getCorrectIndicesSorted(q);
+  const correctLabel = indicesToLetters(correctIdx);
+  const correctDetail = correctIdx
+    .map((i) => `${String.fromCharCode(65 + i)}（${q.options[i]}）`)
+    .join('；');
+
+  let userLabel: string;
+  if (userAnswer === null) {
+    userLabel = '未作答';
+  } else if (typeof userAnswer === 'number') {
+    userLabel = `${String.fromCharCode(65 + userAnswer)}（${q.options[userAnswer]}）`;
+  } else if (userAnswer.length === 0) {
+    userLabel = '未选择任何项';
+  } else {
+    userLabel = userAnswer
+      .map((i) => `${String.fromCharCode(65 + i)}（${q.options[i]}）`)
+      .join('；');
+  }
+
+  const typeHint = isMultiQuestion(q) ? '多选题（需全部选对才算对）' : '单选题';
 
   return `学生在以下题目中回答错误，请帮助分析：
 
 【章节】${ch?.name || '未知'}
+【题型】${typeHint}
 【题目】${q.content}
 【选项】
 ${options}
 【学生选择】${userLabel}
-【正确答案】${correctLabel}
+【正确答案】${correctLabel}（${correctDetail}）
 
 请从以下角度简要分析（总共不超过 300 字）：
-1. 为什么正确答案是 ${correctLabel}
-2. 学生选 ${userLabel} 可能的误区
+1. 为什么正确选项是 ${correctLabel}
+2. 学生作答可能的误区
 3. 记忆口诀或关键提示`;
 }
 
@@ -147,7 +177,8 @@ function buildOverallPrompt(wrongQuestions: Question[]): string {
   const questionList = wrongQuestions
     .map((q, i) => {
       const ch = chapters.find((c) => c.id === q.chapter);
-      return `${i + 1}. [${ch?.name}] ${q.content}`;
+      const tag = isMultiQuestion(q) ? '[多选]' : '[单选]';
+      return `${i + 1}. ${tag}[${ch?.name}] ${q.content}`;
     })
     .join('\n');
 
@@ -167,11 +198,17 @@ ${questionList}
 
 // ── Public API ──
 
+function cacheKeyForUserAnswer(userAnswer: number | number[] | null): string {
+  if (userAnswer === null) return 'null';
+  if (typeof userAnswer === 'number') return String(userAnswer);
+  return JSON.stringify([...userAnswer].sort((a, b) => a - b));
+}
+
 export async function aiAnalyzeQuestion(
   question: Question,
-  userAnswer: number
+  userAnswer: number | number[] | null
 ): Promise<string> {
-  const cacheKey = `q_${question.id}_${userAnswer}`;
+  const cacheKey = `q_${question.id}_${cacheKeyForUserAnswer(userAnswer)}`;
   const cached = getCachedResponse(cacheKey);
   if (cached) return cached;
 

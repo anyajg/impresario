@@ -1,7 +1,12 @@
 import { View, Text, ScrollView } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useState, useCallback } from 'react';
-import { questions, chapters, type Question } from '../../data/questions';
+import {
+  questions,
+  chapters,
+  getCorrectIndicesSorted,
+  type Question,
+} from '../../data/questions';
 import { getWrongIds, clearWrongIds, removeWrongId } from '../../utils/storage';
 import {
   ensureAIConfigured,
@@ -68,7 +73,7 @@ function WrongBookPage() {
 
     setAiLoading((prev) => ({ ...prev, [key]: true }));
     try {
-      const result = await aiAnalyzeQuestion(q, -1);
+      const result = await aiAnalyzeQuestion(q, null);
       setAiResults((prev) => ({ ...prev, [key]: result }));
     } catch (e: any) {
       Taro.showToast({ title: e.message || 'AI 请求失败', icon: 'none' });
@@ -196,7 +201,8 @@ function WrongBookPage() {
                 <View className='wrong-options'>
                   {q.options.map((opt, idx) => {
                     const label = String.fromCharCode(65 + idx);
-                    const isAnswer = idx === q.answer;
+                    const correctSet = new Set(getCorrectIndicesSorted(q));
+                    const isAnswer = correctSet.has(idx);
                     return (
                       <View
                         key={idx}
