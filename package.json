@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "演出经纪人考试练习平台（H5 + 微信小程序）",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev:h5": "taro build --type h5 --watch",
     "dev:weapp": "taro build --type weapp --watch",

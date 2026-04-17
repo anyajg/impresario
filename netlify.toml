@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build:h5"
+  publish = "dist"
+
+# 浏览器路由刷新时回退到入口（静态资源仍优先匹配文件）
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

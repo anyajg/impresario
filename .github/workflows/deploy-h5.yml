@@ -1,0 +1,47 @@
+# 将 H5 发布到 GitHub Pages（仓库站点：https://<用户>.github.io/impresario/）
+# 使用前：Settings → Pages → Build and deployment → Source 选「GitHub Actions」
+name: Deploy H5 to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install and build
+        env:
+          # 与仓库名一致；若改名或改 Pages 路径，请同步修改末尾斜杠
+          TARO_APP_PUBLIC_PATH: /impresario/
+        run: |
+          npm ci
+          npm run build:h5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

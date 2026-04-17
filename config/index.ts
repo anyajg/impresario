@@ -1,5 +1,10 @@
 import { defineConfig } from '@tarojs/cli';
 
+/** H5 部署子路径时设置，例如 GitHub Pages 仓库站点：`/impresario/`。Vercel 根域名留空即可。 */
+const h5PublicPath = process.env.TARO_APP_PUBLIC_PATH || '/';
+const h5Basename =
+  h5PublicPath === '/' ? undefined : h5PublicPath.replace(/\/$/, '');
+
 export default defineConfig<'vite'>({
   projectName: 'impresario',
   date: '2026-04-16',
@@ -44,7 +49,8 @@ export default defineConfig<'vite'>({
     }
   },
   h5: {
-    publicPath: '/',
-    staticDirectory: 'static'
+    publicPath: h5PublicPath,
+    staticDirectory: 'static',
+    ...(h5Basename ? { router: { basename: h5Basename } } : {})
   }
 });
