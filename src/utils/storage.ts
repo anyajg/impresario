@@ -4,6 +4,7 @@ const WRONG_IDS_KEY = 'imp_wrong_ids';
 const STATS_KEY = 'imp_stats';
 const EXAM_RESULT_KEY = 'imp_exam_result';
 const EXAM_HISTORY_KEY = 'imp_exam_history';
+const ACCESS_STATE_KEY = 'imp_access_state';
 
 export interface PracticeStats {
   totalAnswered: number;
@@ -20,6 +21,13 @@ export interface ExamResult {
   answers: Record<string, ExamStoredAnswer>;
   date: string;
   duration: number;
+}
+
+export interface AccessState {
+  unlocked: boolean;
+  userKey?: string;
+  inviteCode?: string;
+  activatedAt?: string;
 }
 
 // ── Wrong Questions ──
@@ -89,4 +97,27 @@ export function getExamHistory(): ExamResult[] {
   } catch {
     return [];
   }
+}
+
+// ── Access / Invite Code ──
+
+export function getAccessState(): AccessState {
+  try {
+    return Taro.getStorageSync(ACCESS_STATE_KEY) || { unlocked: false };
+  } catch {
+    return { unlocked: false };
+  }
+}
+
+export function isInviteUnlocked(): boolean {
+  return !!getAccessState().unlocked;
+}
+
+export function setAccessState(next: AccessState): void {
+  Taro.setStorageSync(ACCESS_STATE_KEY, next);
+}
+
+export function setUserKey(userKey: string): void {
+  const prev = getAccessState();
+  setAccessState({ ...prev, userKey: userKey.trim() });
 }

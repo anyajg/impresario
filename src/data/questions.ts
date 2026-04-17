@@ -1,6 +1,7 @@
 import type { Chapter, Question } from './questions.types';
 import Taro from '@tarojs/taro';
 import { importedQuestions } from './questions.imported';
+import { isInviteUnlocked } from '../utils/storage';
 
 export type { Chapter, Question, QuestionChoiceType } from './questions.types';
 export {
@@ -367,6 +368,7 @@ if (process.env.TARO_ENV !== 'weapp') {
 const AUTO_START_ID = 118;
 const FULL_QUESTION_BANK_URL =
   'https://raw.githubusercontent.com/anyajg/impresario/main/src/data/questions.auto.json';
+export const TRIAL_QUESTION_LIMIT = 30;
 
 export const questions: Question[] = [
   ...baseQuestions,
@@ -415,9 +417,19 @@ function mergeQuestionBank(auto: Question[]) {
   );
 }
 
+function getAccessibleQuestions(): Question[] {
+  if (isInviteUnlocked()) return questions;
+  return questions.slice(0, Math.min(TRIAL_QUESTION_LIMIT, questions.length));
+}
+
+export function getAvailableQuestionCount(): number {
+  return getAccessibleQuestions().length;
+}
+
 export async function ensureFullQuestionBankLoaded(): Promise<boolean> {
   if (fullBankLoaded) return true;
   if (process.env.TARO_ENV !== 'weapp') return true;
+  if (!isInviteUnlocked()) return true;
   if (loadingPromise) return loadingPromise;
 
   loadingPromise = new Promise((resolve) => {
@@ -453,15 +465,15 @@ export async function ensureFullQuestionBankLoaded(): Promise<boolean> {
 }
 
 export function getQuestionsByChapter(chapterId: number): Question[] {
-  return questions.filter((q) => q.chapter === chapterId);
+  return getAccessibleQuestions().filter((q) => q.chapter === chapterId);
 }
 
 export function getQuestionById(id: number): Question | undefined {
-  return questions.find((q) => q.id === id);
+  return getAccessibleQuestions().find((q) => q.id === id);
 }
 
 export function getRandomQuestions(count: number): Question[] {
-  const arr = [...questions];
+  const arr = [...getAccessibleQuestions()];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];

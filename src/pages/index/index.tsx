@@ -1,13 +1,23 @@
-import { View, Text } from '@tarojs/components';
+import { View, Text, Input } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { useState } from 'react';
 import {
-  questions,
   chapters,
   getQuestionsByChapter,
   ensureFullQuestionBankLoaded,
+  getAvailableQuestionCount,
+  TRIAL_QUESTION_LIMIT,
 } from '../../data/questions';
-import { getStats, getWrongIds, getExamHistory } from '../../utils/storage';
+import {
+  getStats,
+  getWrongIds,
+  getExamHistory,
+  isInviteUnlocked,
+  getAccessState,
+  setAccessState,
+  setUserKey,
+} from '../../utils/storage';
+import { redeemInviteCode, syncAccessStateFromServer } from '../../utils/access';
 import { isAIConfigured } from '../../utils/ai';
 import TabBar from '../../components/TabBar';
 import './index.scss';
@@ -18,10 +28,20 @@ function IndexPage() {
   const [wrongCount, setWrongCount] = useState(0);
   const [examCount, setExamCount] = useState(0);
   const [aiReady, setAiReady] = useState(false);
-  const [questionCount, setQuestionCount] = useState(questions.length);
+  const [questionCount, setQuestionCount] = useState(getAvailableQuestionCount());
+  const [inviteCode, setInviteCode] = useState('');
+  const [userKey, setUserKeyInput] = useState(getAccessState().userKey || '');
+  const [unlocked, setUnlocked] = useState(isInviteUnlocked());
 
   useDidShow(async () => {
-    await ensureFullQuestionBankLoaded();
+    const savedUserKey = getAccessState().userKey || '';
+    if (savedUserKey) {
+      setUserKeyInput(savedUserKey);
+      await syncAccessStateFromServer(savedUserKey);
+    }
+    const nowUnlocked = isInviteUnlocked();
+    setUnlocked(nowUnlocked);
+    if (nowUnlocked) await ensureFullQuestionBankLoaded();
     const stats = getStats();
     setTotalAnswered(stats.totalAnswered);
     setCorrectRate(
@@ -32,8 +52,28 @@ function IndexPage() {
     setWrongCount(getWrongIds().length);
     setExamCount(getExamHistory().length);
     setAiReady(isAIConfigured());
-    setQuestionCount(questions.length);
+    setQuestionCount(getAvailableQuestionCount());
   });
+
+  const handleActivate = async () => {
+    setUserKey(userKey);
+    const res = await redeemInviteCode({ userKey, inviteCode });
+    if (!res.ok) {
+      Taro.showToast({ title: res.message || '解锁失败', icon: 'none' });
+      return;
+    }
+    setAccessState({
+      unlocked: true,
+      userKey: userKey.trim(),
+      inviteCode: inviteCode.trim().toUpperCase(),
+      activatedAt: new Date().toISOString(),
+    });
+    Taro.showToast({ title: '已解锁完整版', icon: 'success' });
+    setUnlocked(true);
+    await ensureFullQuestionBankLoaded();
+    setQuestionCount(getAvailableQuestionCount());
+    setInviteCode('');
+  };
 
   return (
     <View className='page'>
@@ -72,6 +112,32 @@ function IndexPage() {
           <Text className='stat-label'>错题</Text>
         </View>
       </View>
+
+      {!unlocked && (
+        <View className='invite-card'>
+          <Text className='invite-title'>体验版可免费练习 {TRIAL_QUESTION_LIMIT} 题</Text>
+          <Text className='invite-desc'>输入用户标识与邀请码后解锁完整版题库</Text>
+          <View className='invite-row'>
+            <Input
+              className='invite-input'
+              value={userKey}
+              placeholder='用户标识（手机号/邮箱）'
+              onInput={(e) => setUserKeyInput(e.detail.value)}
+            />
+          </View>
+          <View className='invite-row'>
+            <Input
+              className='invite-input'
+              value={inviteCode}
+              placeholder='请输入邀请码'
+              onInput={(e) => setInviteCode(e.detail.value)}
+            />
+            <View className='invite-btn' onClick={handleActivate}>
+              <Text className='invite-btn-text'>解锁</Text>
+            </View>
+          </View>
+        </View>
+      )}
 
       {/* Menu Cards */}
       <View className='section-title'>

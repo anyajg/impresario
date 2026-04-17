@@ -97,3 +97,56 @@ npm run build:weapp
 ### 与 H5 同时维护时
 
 先改代码 → 需要发网页时执行 `npm run build:h5`；需要发小程序时执行 `npm run build:weapp`。两者输出目录已分开，互不影响。
+
+## 邀请码收费（人工发码）后端
+
+当前前端支持「体验版 30 题 + 邀请码解锁完整版」，并支持 H5 / 小程序共用同一用户标识。  
+为保证“一码一人”，必须使用服务端校验（推荐 Supabase 免费档）。
+
+### 1) 建库与建表
+
+在 Supabase SQL Editor 执行：
+
+- `supabase/schema.sql`
+
+执行后会创建：
+- `access_users`（用户标识）
+- `invite_codes`（邀请码）
+- `invite_redeems`（兑换记录）
+- `redeem_invite` / `access_status` 两个数据库函数
+
+### 2) 部署 Edge Functions
+
+本仓库已提供：
+- `supabase/functions/redeem-invite/index.ts`
+- `supabase/functions/access-status/index.ts`
+
+部署后需在函数环境变量中设置：
+- `PROJECT_URL`
+- `SERVICE_ROLE_KEY`
+
+### 3) 配置前端调用地址
+
+编辑 `src/config/accessConfig.ts`：
+
+```ts
+export const accessConfig = {
+  apiBaseUrl: 'https://<project-ref>.supabase.co/functions/v1',
+  anonKey: '<your-anon-key>',
+};
+```
+
+### 4) 微信小程序合法域名
+
+在公众平台添加 request 合法域名：
+
+- `https://<project-ref>.supabase.co`
+- （若小程序需拉完整版题库）`https://raw.githubusercontent.com`
+
+### 5) 人工发码流程建议
+
+1. 用户线下赞助后，你在 `invite_codes` 新增一个 `max_uses = 1` 的码。  
+2. 用户在首页输入：
+   - 用户标识（建议手机号/邮箱，H5 与小程序输入同一个）
+   - 邀请码  
+3. 服务端校验成功后，记录兑换关系；同一用户跨端自动已解锁。
