@@ -44,10 +44,13 @@ npm run build:weapp
 
 ### 方式 C：GitHub Pages（子路径 `/impresario/`）
 
-1. 仓库 **Settings → Pages**：**Source** 选 **GitHub Actions**。  
-2. 推送 `main` 后会运行 `.github/workflows/deploy-h5.yml`，站点一般为：  
-   `https://<你的用户名>.github.io/impresario/`  
-3. 若仓库改名，请改 workflow 里的 `TARO_APP_PUBLIC_PATH`（须以 `/` 开头和结尾，例如 `/新仓库名/`）。
+1. 打开本仓库 **Settings** → 左侧 **Pages**。  
+2. **Build and deployment** 里 **Source** 选 **GitHub Actions**（不要选 branch / Deploy from a branch）。  
+3. 保存后，到 **Actions** 打开 **Deploy H5 to GitHub Pages**，若未自动跑，点 **Run workflow** 手动跑一次。  
+4. 等两个 job（build / deploy）都绿了以后，访问：  
+   `https://<你的 GitHub 用户名>.github.io/impresario/`  
+   若首次提示需批准 **github-pages** 环境，到 **Settings → Environments** 里按提示放行即可。  
+5. 若仓库改名，请同步修改 `.github/workflows/deploy-h5.yml` 里的 `TARO_APP_PUBLIC_PATH`（须以 `/` 开头和结尾，例如 `/新仓库名/`）。
 
 ### 子路径本地自测
 

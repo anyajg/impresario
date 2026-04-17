@@ -32,6 +32,9 @@ jobs:
         run: |
           npm ci
           npm run build:h5
+      # GitHub Pages 对不存在的路径直接 404；若将来改用 browser 路由，可避免白屏
+      - name: SPA fallback (404 → index)
+        run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
