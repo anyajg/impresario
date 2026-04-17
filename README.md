@@ -24,8 +24,8 @@ npm run dev:weapp
 ## 生产构建
 
 ```bash
-npm run build:h5
-npm run build:weapp
+npm run build:h5    # 产物目录：dist/（给 H5 / GitHub Pages / Vercel）
+npm run build:weapp # 产物目录：dist-weapp/（给微信小程序，避免覆盖 dist）
 ```
 
 ## 网页（H5）免费上线
@@ -58,3 +58,42 @@ npm run build:weapp
 TARO_APP_PUBLIC_PATH=/impresario/ npm run build:h5
 # 再用 npx serve dist 等方式本地预览（注意从子路径访问）
 ```
+
+## 微信小程序上线（需微信侧操作）
+
+微信不提供「替你托管代码」的按钮式部署：你需要**注册小程序 + 本机构建 + 开发者工具上传**。以下为个人/非商用常见流程。
+
+### 1. 注册与 AppID
+
+1. 打开 [微信公众平台](https://mp.weixin.qq.com/) → 注册 **小程序**（个人或企业按实际情况）。  
+2. 在 **开发 → 开发管理 → 开发设置** 里复制 **AppID**。  
+3. 编辑仓库根目录 **`project.config.json`**，把 `"appid": "touristappid"` 改成你的 **正式 AppID**（`touristappid` 仅用于游客体验，不能用于正式发布）。
+
+### 2. 构建
+
+```bash
+npm install
+npm run build:weapp
+```
+
+完成后小程序代码在 **`dist-weapp/`**（已在 `project.config.json` 里通过 `miniprogramRoot` 指向该目录）。
+
+### 3. 用微信开发者工具打开项目
+
+1. 安装 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)。  
+2. **导入项目** 时，**项目目录请选择本仓库根目录**（包含 `project.config.json` 的那一层，例如 `impresario`），**不要**只选 `dist-weapp`。工具会按 `miniprogramRoot` 读取编译结果。  
+3. 若提示「云开发」等与本项目无关的能力，可跳过。
+
+### 4. 合法域名（若使用网络请求）
+
+若小程序里请求了 **AI 接口或其它 HTTPS 域名**，必须在公众平台 **开发 → 开发管理 → 服务器域名** 里配置 **request 合法域名**（仅支持 https，且需按微信校验文件要求）。纯本地题库、无外链时可暂不配。
+
+### 5. 上传与审核
+
+1. 在开发者工具中点击 **上传**，填写版本号与备注。  
+2. 登录 [微信公众平台](https://mp.weixin.qq.com/) → **版本管理** → 将开发版 **提交审核**。  
+3. 审核通过后 **发布**。个人主体类目与能力以微信规则为准。
+
+### 与 H5 同时维护时
+
+先改代码 → 需要发网页时执行 `npm run build:h5`；需要发小程序时执行 `npm run build:weapp`。两者输出目录已分开，互不影响。

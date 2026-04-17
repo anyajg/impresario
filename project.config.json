@@ -1,5 +1,5 @@
 {
-  "miniprogramRoot": "dist/",
+  "miniprogramRoot": "dist-weapp/",
   "projectname": "impresario",
   "description": "演出经纪人考试练习平台",
   "appid": "touristappid",

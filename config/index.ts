@@ -5,6 +5,9 @@ const h5PublicPath = process.env.TARO_APP_PUBLIC_PATH || '/';
 const h5Basename =
   h5PublicPath === '/' ? undefined : h5PublicPath.replace(/\/$/, '');
 
+/** 与 H5 分离，避免 `build:weapp` 覆盖 `dist`（影响 Pages / Vercel） */
+const outputRoot = process.env.TARO_ENV === 'weapp' ? 'dist-weapp' : 'dist';
+
 export default defineConfig<'vite'>({
   projectName: 'impresario',
   date: '2026-04-16',
@@ -15,7 +18,7 @@ export default defineConfig<'vite'>({
     828: 1.81 / 2
   },
   sourceRoot: 'src',
-  outputRoot: 'dist',
+  outputRoot,
   plugins: [
     '@tarojs/plugin-platform-weapp',
     '@tarojs/plugin-platform-h5',
@@ -23,7 +26,7 @@ export default defineConfig<'vite'>({
   ],
   defineConstants: {},
   copy: {
-    patterns: [],
+    patterns: [{ from: 'src/sitemap.json', to: 'sitemap.json' }],
     options: {}
   },
   framework: 'react',
