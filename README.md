@@ -100,7 +100,7 @@ npm run build:weapp
 
 ## 邀请码收费（人工发码）后端
 
-当前前端支持「体验版 30 题 + 邀请码解锁完整版」，并支持 H5 / 小程序共用同一用户标识。  
+当前前端支持「体验版 88 题 + 邀请码解锁完整版」，并支持 H5 / 小程序共用同一用户标识。  
 为保证“一码一人”，必须使用服务端校验（推荐 Supabase 免费档）。
 
 ### 1) 建库与建表
@@ -120,12 +120,25 @@ npm run build:weapp
 本仓库已提供：
 - `supabase/functions/redeem-invite/index.ts`
 - `supabase/functions/access-status/index.ts`
+- `supabase/functions/questions-page/index.ts`
 
 部署后需在函数环境变量中设置：
 - `PROJECT_URL`
 - `SERVICE_ROLE_KEY`
 
-### 3) 配置前端调用地址
+### 3) 导入完整题库到服务端（避免公开静态 JSON）
+
+执行一次建表 SQL（`supabase/schema.sql`）后，运行：
+
+```bash
+PROJECT_URL=https://<project-ref>.supabase.co \
+SERVICE_ROLE_KEY=<service-role-key> \
+node scripts/push-question-bank.mjs
+```
+
+该脚本会把 `src/data/questions.auto.json` 批量写入 `public.question_bank`，客户端后续通过 `questions-page` 分页获取，不再依赖公开 `raw.githubusercontent.com` 题库地址。
+
+### 4) 配置前端调用地址
 
 编辑 `src/config/accessConfig.ts`：
 
@@ -136,14 +149,13 @@ export const accessConfig = {
 };
 ```
 
-### 4) 微信小程序合法域名
+### 5) 微信小程序合法域名
 
 在公众平台添加 request 合法域名：
 
 - `https://<project-ref>.supabase.co`
-- （若小程序需拉完整版题库）`https://raw.githubusercontent.com`
 
-### 5) 人工发码流程建议
+### 6) 人工发码流程建议
 
 1. 用户线下赞助后，你在 `invite_codes` 新增一个 `max_uses = 1` 的码。  
 2. 用户在首页输入：

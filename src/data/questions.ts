@@ -1,7 +1,7 @@
 import type { Chapter, Question } from './questions.types';
-import Taro from '@tarojs/taro';
 import { importedQuestions } from './questions.imported';
-import { isInviteUnlocked } from '../utils/storage';
+import { fetchQuestionPage, type QuestionPageItem } from '../utils/access';
+import { getAccessState, isInviteUnlocked } from '../utils/storage';
 
 export type { Chapter, Question, QuestionChoiceType } from './questions.types';
 export {
@@ -359,8 +359,6 @@ const baseQuestions: Question[] = [
 ];
 
 const AUTO_START_ID = 118;
-const FULL_QUESTION_BANK_URL =
-  'https://raw.githubusercontent.com/anyajg/impresario/main/src/data/questions.auto.json';
 export const TRIAL_QUESTION_LIMIT = 88;
 
 export const questions: Question[] = [
@@ -368,26 +366,12 @@ export const questions: Question[] = [
   ...importedQuestions,
 ];
 
-type AutoJsonRoot = {
-  version: number;
-  count: number;
-  items: Array<{
-    chapter: number;
-    type: 'single' | 'multi';
-    content: string;
-    options: string[];
-    answer: number | number[];
-    explanation: string;
-    source: string;
-  }>;
-};
-
 let fullBankLoaded = false;
 let loadingPromise: Promise<boolean> | null = null;
 
-function mapAutoItemsToQuestions(root: AutoJsonRoot): Question[] {
-  return root.items.map((it, i) => ({
-    id: AUTO_START_ID + i,
+function mapRemoteItemsToQuestions(items: QuestionPageItem[]): Question[] {
+  return items.map((it, i) => ({
+    id: Number.isFinite(it.id) ? it.id : AUTO_START_ID + i,
     chapter: it.chapter,
     ...(it.type === 'multi' ? { type: 'multi' as const } : {}),
     content: it.content,
@@ -424,32 +408,41 @@ export async function ensureFullQuestionBankLoaded(): Promise<boolean> {
   if (loadingPromise) return loadingPromise;
 
   loadingPromise = new Promise((resolve) => {
-    Taro.request({
-      url: FULL_QUESTION_BANK_URL,
-      method: 'GET',
-      timeout: 15000,
-      success(res) {
-        try {
-          const root = res.data as AutoJsonRoot;
-          if (!root?.items?.length) {
+    (async () => {
+      try {
+        const userKey = (getAccessState().userKey || '').trim();
+        if (!userKey) {
+          resolve(false);
+          return;
+        }
+
+        const pageSize = 200;
+        let page = 1;
+        const items: QuestionPageItem[] = [];
+        while (page <= 200) {
+          const resp = await fetchQuestionPage({ userKey, page, pageSize });
+          if (!resp.ok || !resp.unlocked) {
             resolve(false);
             return;
           }
-          const auto = mapAutoItemsToQuestions(root);
-          mergeQuestionBank(auto);
-          fullBankLoaded = true;
-          resolve(true);
-        } catch {
-          resolve(false);
+
+          const batch = Array.isArray(resp.items) ? resp.items : [];
+          if (batch.length === 0) break;
+          items.push(...batch);
+          if (batch.length < pageSize) break;
+          page += 1;
         }
-      },
-      fail() {
+
+        const auto = mapRemoteItemsToQuestions(items);
+        mergeQuestionBank(auto);
+        fullBankLoaded = true;
+        resolve(true);
+      } catch {
         resolve(false);
-      },
-      complete() {
+      } finally {
         loadingPromise = null;
-      },
-    });
+      }
+    })();
   });
 
   return loadingPromise;

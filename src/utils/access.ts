@@ -10,6 +10,24 @@ type ApiResp = {
   activatedAt?: string;
 };
 
+export type QuestionPageItem = {
+  id: number;
+  chapter: number;
+  type: 'single' | 'multi';
+  content: string;
+  options: string[];
+  answer: number | number[];
+  explanation: string;
+  source: string;
+};
+
+type QuestionPageResp = ApiResp & {
+  page?: number;
+  pageSize?: number;
+  total?: number;
+  items?: QuestionPageItem[];
+};
+
 function isConfigured() {
   return !!(accessConfig.apiBaseUrl && accessConfig.anonKey);
 }
@@ -64,4 +82,17 @@ export async function syncAccessStateFromServer(userKey: string): Promise<boolea
     activatedAt: resp.activatedAt || prev.activatedAt,
   });
   return !!resp.unlocked;
+}
+
+export async function fetchQuestionPage(params: {
+  userKey: string;
+  page: number;
+  pageSize: number;
+}): Promise<QuestionPageResp> {
+  if (!isConfigured()) return { ok: false, message: '题库服务未配置' };
+  const userKey = params.userKey.trim();
+  const page = Math.max(1, Math.floor(params.page || 1));
+  const pageSize = Math.max(1, Math.min(200, Math.floor(params.pageSize || 100)));
+  if (!userKey) return { ok: false, message: '请输入邀请码专属昵称' };
+  return post('questions-page', { userKey, page, pageSize }) as Promise<QuestionPageResp>;
 }

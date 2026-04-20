@@ -26,6 +26,22 @@ create table if not exists public.invite_redeems (
   unique (user_id)
 );
 
+-- 完整题库（仅服务端读取，前端通过 questions-page 分页获取）
+create table if not exists public.question_bank (
+  seq int primary key,
+  chapter int not null,
+  type text not null default 'single',
+  content text not null,
+  options jsonb not null,
+  answer jsonb not null,
+  explanation text not null default '',
+  source text not null default '',
+  created_at timestamptz not null default now(),
+  constraint question_bank_type_check check (type in ('single', 'multi'))
+);
+
+create index if not exists idx_question_bank_chapter on public.question_bank(chapter);
+
 create or replace function public.redeem_invite(
   p_code text,
   p_user_key text,
