@@ -40,7 +40,7 @@ export async function redeemInviteCode(params: {
   if (!isConfigured()) return { ok: false, message: '邀请码服务未配置' };
   const userKey = params.userKey.trim();
   const inviteCode = params.inviteCode.trim().toUpperCase();
-  if (!userKey) return { ok: false, message: '请输入用户标识' };
+  if (!userKey) return { ok: false, message: '请输入邀请码专属昵称' };
   if (!inviteCode) return { ok: false, message: '请输入邀请码' };
 
   return post('redeem-invite', {

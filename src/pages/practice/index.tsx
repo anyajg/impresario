@@ -22,6 +22,7 @@ import TabBar from '../../components/TabBar';
 import './index.scss';
 
 function PracticePage() {
+  const supportsAI = process.env.TARO_ENV !== 'weapp';
   const router = Taro.getCurrentInstance().router;
   const chapterParam = router?.params?.chapter;
   const modeParam = router?.params?.mode;
@@ -146,6 +147,7 @@ function PracticePage() {
   };
 
   const handleAI = useCallback(async () => {
+    if (!supportsAI) return;
     if (!ensureAIConfigured()) return;
     if (aiText || aiLoading) return;
     const q = practiceQuestions[currentIndex];
@@ -163,7 +165,7 @@ function PracticePage() {
     } finally {
       setAiLoading(false);
     }
-  }, [practiceQuestions, currentIndex, picked, aiText, aiLoading]);
+  }, [supportsAI, practiceQuestions, currentIndex, picked, aiText, aiLoading]);
 
   // ── Chapter Selection (Tab 主页模式) ──
   if (!currentChapter && modeParam !== 'wrong') {
@@ -339,7 +341,7 @@ function PracticePage() {
             <Text className='explanation-text'>{question.explanation}</Text>
           </View>
 
-          {!isCorrect && !aiText && (
+          {supportsAI && !isCorrect && !aiText && (
             <View className='ai-btn' onClick={handleAI}>
               {aiLoading ? (
                 <Text className='ai-btn-text'>分析中…</Text>
@@ -349,7 +351,7 @@ function PracticePage() {
             </View>
           )}
 
-          {aiText && (
+          {supportsAI && aiText && (
             <View className='ai-result'>
               <Text className='ai-result-title'>AI 解析</Text>
               <Text className='ai-result-text'>{aiText}</Text>

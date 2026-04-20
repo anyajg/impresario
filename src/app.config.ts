@@ -1,34 +1,41 @@
+const isWeapp = process.env.TARO_ENV === 'weapp';
+
+const subPackages = [
+  {
+    root: 'pages/knowledge',
+    pages: ['index', 'detail'],
+  },
+  {
+    root: 'pages/practice',
+    pages: ['index'],
+  },
+  {
+    root: 'pages/wrongBook',
+    pages: ['index'],
+  },
+  {
+    root: 'pages/exam',
+    pages: ['index'],
+  },
+  {
+    root: 'pages/examResult',
+    pages: ['index'],
+  },
+];
+
+if (!isWeapp) {
+  subPackages.push({
+    root: 'pages/aiSettings',
+    pages: ['index'],
+  });
+}
+
 export default defineAppConfig({
   pages: [
     // 主包只保留首页，降低主包体积（微信主包限制 2MB）
     'pages/index/index',
   ],
-  subPackages: [
-    {
-      root: 'pages/knowledge',
-      pages: ['index', 'detail'],
-    },
-    {
-      root: 'pages/practice',
-      pages: ['index'],
-    },
-    {
-      root: 'pages/wrongBook',
-      pages: ['index'],
-    },
-    {
-      root: 'pages/exam',
-      pages: ['index'],
-    },
-    {
-      root: 'pages/examResult',
-      pages: ['index'],
-    },
-    {
-      root: 'pages/aiSettings',
-      pages: ['index'],
-    },
-  ],
+  subPackages,
   window: {
     backgroundTextStyle: 'dark',
     navigationBarBackgroundColor: '#f8fafc',

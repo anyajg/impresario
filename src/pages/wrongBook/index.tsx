@@ -18,6 +18,7 @@ import TabBar from '../../components/TabBar';
 import './index.scss';
 
 function WrongBookPage() {
+  const supportsAI = process.env.TARO_ENV !== 'weapp';
   const [wrongQuestions, setWrongQuestions] = useState<Question[]>([]);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -69,6 +70,7 @@ function WrongBookPage() {
 
   // ── AI: single question ──
   const handleAIQuestion = async (q: Question) => {
+    if (!supportsAI) return;
     if (!ensureAIConfigured()) return;
     const key = `q_${q.id}`;
     if (aiResults[key]) return; // already loaded
@@ -86,6 +88,7 @@ function WrongBookPage() {
 
   // ── AI: overall report ──
   const handleAIOverall = async () => {
+    if (!supportsAI) return;
     if (!ensureAIConfigured()) return;
     if (overallReport) {
       setShowReport(true);
@@ -136,15 +139,16 @@ function WrongBookPage() {
         </View>
       </View>
 
-      {/* AI Overall */}
-      <View className='ai-overall-btn' onClick={handleAIOverall}>
-        <Text className='ai-overall-btn-text'>薄弱项诊断</Text>
-        <Text className='ai-overall-btn-sub'>
-          分析 {wrongQuestions.length} 道错题，生成复习建议
-        </Text>
-      </View>
+      {supportsAI && (
+        <View className='ai-overall-btn' onClick={handleAIOverall}>
+          <Text className='ai-overall-btn-text'>薄弱项诊断</Text>
+          <Text className='ai-overall-btn-sub'>
+            分析 {wrongQuestions.length} 道错题，生成复习建议
+          </Text>
+        </View>
+      )}
 
-      {showReport && (
+      {supportsAI && showReport && (
         <View className='ai-report'>
           <View className='ai-report-header'>
             <Text className='ai-report-title'>诊断报告</Text>
@@ -226,7 +230,7 @@ function WrongBookPage() {
                 </View>
 
                 {/* AI per-question */}
-                {!hasAI && (
+                {supportsAI && !hasAI && (
                   <View
                     className='ai-btn'
                     onClick={() => handleAIQuestion(q)}
@@ -239,7 +243,7 @@ function WrongBookPage() {
                   </View>
                 )}
 
-                {hasAI && (
+                {supportsAI && hasAI && (
                   <View className='ai-result'>
                     <Text className='ai-result-title'>AI 解析</Text>
                     <Text className='ai-result-text'>{aiResults[aiKey]}</Text>

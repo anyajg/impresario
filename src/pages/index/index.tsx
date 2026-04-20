@@ -23,6 +23,7 @@ import TabBar from '../../components/TabBar';
 import './index.scss';
 
 function IndexPage() {
+  const isWeapp = process.env.TARO_ENV === 'weapp';
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [correctRate, setCorrectRate] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
@@ -51,7 +52,7 @@ function IndexPage() {
     );
     setWrongCount(getWrongIds().length);
     setExamCount(getExamHistory().length);
-    setAiReady(isAIConfigured());
+    setAiReady(!isWeapp && isAIConfigured());
     setQuestionCount(getAvailableQuestionCount());
   });
 
@@ -116,12 +117,14 @@ function IndexPage() {
       {!unlocked && (
         <View className='invite-card'>
           <Text className='invite-title'>体验版可免费练习 {TRIAL_QUESTION_LIMIT} 题</Text>
-          <Text className='invite-desc'>输入用户标识与邀请码后解锁完整版题库</Text>
+          <Text className='invite-desc'>
+            输入邀请码专属昵称与邀请码后解锁完整版题库
+          </Text>
           <View className='invite-row'>
             <Input
               className='invite-input'
               value={userKey}
-              placeholder='用户标识（手机号/邮箱）'
+              placeholder='邀请码专属昵称'
               onInput={(e) => setUserKeyInput(e.detail.value)}
             />
           </View>
@@ -212,26 +215,27 @@ function IndexPage() {
         <Text className='card-arrow'>›</Text>
       </View>
 
-      {/* AI Settings */}
-      <View
-        className='card'
-        onClick={() => Taro.navigateTo({ url: '/pages/aiSettings/index' })}
-      >
-        <View className='card-left'>
-          <View className='card-icon'>
-            <Text className='card-icon-letter'>析</Text>
+      {!isWeapp && (
+        <View
+          className='card'
+          onClick={() => Taro.navigateTo({ url: '/pages/aiSettings/index' })}
+        >
+          <View className='card-left'>
+            <View className='card-icon'>
+              <Text className='card-icon-letter'>析</Text>
+            </View>
+            <View className='card-info'>
+              <Text className='card-title'>AI 智能解析</Text>
+              <Text className='card-desc'>
+                {aiReady ? 'AI 已配置，可在错题本中使用' : '配置 AI 接口，获取深度解析'}
+              </Text>
+            </View>
           </View>
-          <View className='card-info'>
-            <Text className='card-title'>AI 智能解析</Text>
-            <Text className='card-desc'>
-              {aiReady ? 'AI 已配置，可在错题本中使用' : '配置 AI 接口，获取深度解析'}
-            </Text>
+          <View className={`ai-badge ${aiReady ? 'ai-badge-on' : ''}`}>
+            <Text className='ai-badge-text'>{aiReady ? '已开启' : '未配置'}</Text>
           </View>
         </View>
-        <View className={`ai-badge ${aiReady ? 'ai-badge-on' : ''}`}>
-          <Text className='ai-badge-text'>{aiReady ? '已开启' : '未配置'}</Text>
-        </View>
-      </View>
+      )}
 
       {/* Chapter Progress */}
       <View className='section-title'>
