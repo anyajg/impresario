@@ -361,7 +361,7 @@ const baseQuestions: Question[] = [
 const AUTO_START_ID = 118;
 const FULL_QUESTION_BANK_URL =
   'https://raw.githubusercontent.com/anyajg/impresario/main/src/data/questions.auto.json';
-export const TRIAL_QUESTION_LIMIT = 30;
+export const TRIAL_QUESTION_LIMIT = 88;
 
 export const questions: Question[] = [
   ...baseQuestions,

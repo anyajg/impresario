@@ -71,8 +71,9 @@ begin
     return;
   end if;
 
+  -- 与存储大小写无关：输入已 upper，这里用 upper(trim(code)) 匹配主键实际写法
   select * into v_invite from public.invite_codes
-  where code = v_code and status = 'active'
+  where upper(trim(code)) = v_code and status = 'active'
   for update;
 
   if not found then
@@ -86,13 +87,13 @@ begin
   end if;
 
   insert into public.invite_redeems(code, user_id, platform)
-  values (v_code, v_user_id, coalesce(nullif(trim(p_platform), ''), 'unknown'));
+  values (v_invite.code, v_user_id, coalesce(nullif(trim(p_platform), ''), 'unknown'));
 
   update public.invite_codes
   set used_count = used_count + 1
-  where code = v_code;
+  where code = v_invite.code;
 
-  return query select true, '解锁成功', v_code, now();
+  return query select true, '解锁成功', v_invite.code, now();
 end;
 $$;
 
