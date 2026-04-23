@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const [usersR, redeemsR, activeCodesR, bankR, recentR] = await Promise.all([
+    const [usersR, redeemsR, activeCodesR, bankR, recentR, usableCodesR] = await Promise.all([
       supabase.from('access_users').select('id', { count: 'exact', head: true }),
       supabase.from('invite_redeems').select('id', { count: 'exact', head: true }),
       supabase
@@ -72,9 +72,15 @@ Deno.serve(async (req) => {
         .select('code, platform, created_at, access_users(user_key)')
         .order('created_at', { ascending: false })
         .limit(20),
+      supabase
+        .from('invite_codes')
+        .select('code, max_uses, used_count, status')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(200),
     ]);
 
-    const firstError = [usersR, redeemsR, activeCodesR, bankR, recentR]
+    const firstError = [usersR, redeemsR, activeCodesR, bankR, recentR, usableCodesR]
       .map((it) => it.error)
       .find(Boolean);
     if (firstError) {
@@ -91,6 +97,16 @@ Deno.serve(async (req) => {
       createdAt: String(it.created_at || ''),
     }));
 
+    const usableInviteCodes = ((usableCodesR.data || []) as Array<any>)
+      .filter((it) => Number(it.used_count ?? 0) < Number(it.max_uses ?? 0))
+      .slice(0, 100)
+      .map((it) => ({
+        code: String(it.code || ''),
+        maxUses: Number(it.max_uses ?? 0),
+        usedCount: Number(it.used_count ?? 0),
+        status: String(it.status || ''),
+      }));
+
     return new Response(
       JSON.stringify({
         ok: true,
@@ -102,6 +118,7 @@ Deno.serve(async (req) => {
           questionBank: bankR.count || 0,
         },
         recentRedeems,
+        usableInviteCodes,
       }),
       {
         status: 200,

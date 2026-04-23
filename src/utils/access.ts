@@ -42,6 +42,12 @@ export type AnalyticsSummaryResp = ApiResp & {
     platform: string;
     createdAt: string;
   }>;
+  usableInviteCodes?: Array<{
+    code: string;
+    maxUses: number;
+    usedCount: number;
+    status: string;
+  }>;
 };
 
 function isConfigured() {

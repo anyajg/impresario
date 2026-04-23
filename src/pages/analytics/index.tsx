@@ -17,6 +17,9 @@ function AnalyticsPage() {
   const [recent, setRecent] = useState<
     Array<{ code: string; userKey: string; platform: string; createdAt: string }>
   >([]);
+  const [usableCodes, setUsableCodes] = useState<
+    Array<{ code: string; maxUses: number; usedCount: number; status: string }>
+  >([]);
 
   useDidShow(async () => {
     const userKey = (getAccessState().userKey || '').trim();
@@ -42,6 +45,7 @@ function AnalyticsPage() {
       questionBank: resp.totals?.questionBank || 0,
     });
     setRecent(resp.recentRedeems || []);
+    setUsableCodes(resp.usableInviteCodes || []);
   });
 
   const fmt = (iso: string) => {
@@ -95,6 +99,23 @@ function AnalyticsPage() {
               <Text className='metric-label'>题库总题数</Text>
             </View>
           </View>
+
+          <View className='section-title'>
+            <Text>当前可用邀请码</Text>
+          </View>
+          {usableCodes.length === 0 && (
+            <View className='empty-row'>
+              <Text className='empty-text'>暂无可用邀请码（或已全部用完）</Text>
+            </View>
+          )}
+          {usableCodes.map((it) => (
+            <View className='code-row' key={it.code}>
+              <Text className='code-row-main'>{it.code}</Text>
+              <Text className='code-row-sub'>
+                已用 {it.usedCount} / {it.maxUses} · {it.status}
+              </Text>
+            </View>
+          ))}
 
           <View className='section-title'>
             <Text>最近兑换记录</Text>
