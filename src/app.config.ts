@@ -21,6 +21,10 @@ const subPackages = [
     root: 'pages/examResult',
     pages: ['index'],
   },
+  {
+    root: 'pages/analytics',
+    pages: ['index'],
+  },
 ];
 
 if (!isWeapp) {

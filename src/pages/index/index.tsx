@@ -17,7 +17,11 @@ import {
   setAccessState,
   setUserKey,
 } from '../../utils/storage';
-import { redeemInviteCode, syncAccessStateFromServer } from '../../utils/access';
+import {
+  checkAnalyticsAccess,
+  redeemInviteCode,
+  syncAccessStateFromServer,
+} from '../../utils/access';
 import { isAIConfigured } from '../../utils/ai';
 import TabBar from '../../components/TabBar';
 import './index.scss';
@@ -33,12 +37,16 @@ function IndexPage() {
   const [inviteCode, setInviteCode] = useState('');
   const [userKey, setUserKeyInput] = useState(getAccessState().userKey || '');
   const [unlocked, setUnlocked] = useState(isInviteUnlocked());
+  const [canViewAnalytics, setCanViewAnalytics] = useState(false);
 
   useDidShow(async () => {
     const savedUserKey = getAccessState().userKey || '';
     if (savedUserKey) {
       setUserKeyInput(savedUserKey);
       await syncAccessStateFromServer(savedUserKey);
+      setCanViewAnalytics(await checkAnalyticsAccess(savedUserKey));
+    } else {
+      setCanViewAnalytics(false);
     }
     const nowUnlocked = isInviteUnlocked();
     setUnlocked(nowUnlocked);
@@ -74,6 +82,7 @@ function IndexPage() {
     await ensureFullQuestionBankLoaded();
     setQuestionCount(getAvailableQuestionCount());
     setInviteCode('');
+    setCanViewAnalytics(await checkAnalyticsAccess(userKey));
   };
 
   return (
@@ -234,6 +243,24 @@ function IndexPage() {
           <View className={`ai-badge ${aiReady ? 'ai-badge-on' : ''}`}>
             <Text className='ai-badge-text'>{aiReady ? '已开启' : '未配置'}</Text>
           </View>
+        </View>
+      )}
+
+      {canViewAnalytics && (
+        <View
+          className='card'
+          onClick={() => Taro.navigateTo({ url: '/pages/analytics/index' })}
+        >
+          <View className='card-left'>
+            <View className='card-icon'>
+              <Text className='card-icon-letter'>数</Text>
+            </View>
+            <View className='card-info'>
+              <Text className='card-title'>用户数据分析</Text>
+              <Text className='card-desc'>仅授权用户可见的运营数据看板</Text>
+            </View>
+          </View>
+          <Text className='card-arrow'>›</Text>
         </View>
       )}
 

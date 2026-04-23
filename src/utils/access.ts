@@ -28,6 +28,22 @@ type QuestionPageResp = ApiResp & {
   items?: QuestionPageItem[];
 };
 
+export type AnalyticsSummaryResp = ApiResp & {
+  canAccess?: boolean;
+  totals?: {
+    users: number;
+    redeems: number;
+    activeCodes: number;
+    questionBank: number;
+  };
+  recentRedeems?: Array<{
+    code: string;
+    userKey: string;
+    platform: string;
+    createdAt: string;
+  }>;
+};
+
 function isConfigured() {
   return !!(accessConfig.apiBaseUrl && accessConfig.anonKey);
 }
@@ -95,4 +111,24 @@ export async function fetchQuestionPage(params: {
   const pageSize = Math.max(1, Math.min(200, Math.floor(params.pageSize || 100)));
   if (!userKey) return { ok: false, message: '请输入邀请码专属昵称' };
   return post('questions-page', { userKey, page, pageSize }) as Promise<QuestionPageResp>;
+}
+
+export async function checkAnalyticsAccess(userKey: string): Promise<boolean> {
+  if (!isConfigured()) return false;
+  const key = userKey.trim();
+  if (!key) return false;
+  const resp = (await post('analytics-summary', {
+    userKey: key,
+    checkOnly: true,
+  })) as AnalyticsSummaryResp;
+  return !!(resp.ok && resp.canAccess);
+}
+
+export async function fetchAnalyticsSummary(
+  userKey: string
+): Promise<AnalyticsSummaryResp> {
+  if (!isConfigured()) return { ok: false, message: '数据分析服务未配置' };
+  const key = userKey.trim();
+  if (!key) return { ok: false, message: '请输入邀请码专属昵称' };
+  return post('analytics-summary', { userKey: key }) as Promise<AnalyticsSummaryResp>;
 }

@@ -121,10 +121,21 @@ npm run build:weapp
 - `supabase/functions/redeem-invite/index.ts`
 - `supabase/functions/access-status/index.ts`
 - `supabase/functions/questions-page/index.ts`
+- `supabase/functions/analytics-summary/index.ts`
+
+建议部署命令（允许前端仅携带 `apikey` 访问）：
+
+```bash
+supabase functions deploy redeem-invite --no-verify-jwt
+supabase functions deploy access-status --no-verify-jwt
+supabase functions deploy questions-page --no-verify-jwt
+supabase functions deploy analytics-summary --no-verify-jwt
+```
 
 部署后需在函数环境变量中设置：
 - `PROJECT_URL`
 - `SERVICE_ROLE_KEY`
+- `ADMIN_USER_KEYS`（逗号分隔，仅这些 userKey 可查看用户数据分析）
 
 ### 3) 导入完整题库到服务端（避免公开静态 JSON）
 
