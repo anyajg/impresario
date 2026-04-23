@@ -48,6 +48,12 @@ export type AnalyticsSummaryResp = ApiResp & {
     usedCount: number;
     status: string;
   }>;
+  wrongTop100?: Array<{
+    questionId: number;
+    mistakeCount: number;
+    chapter: number;
+    contentPreview: string;
+  }>;
 };
 
 function isConfigured() {
@@ -137,4 +143,25 @@ export async function fetchAnalyticsSummary(
   const key = userKey.trim();
   if (!key) return { ok: false, message: '请输入邀请码专属昵称' };
   return post('analytics-summary', { userKey: key }) as Promise<AnalyticsSummaryResp>;
+}
+
+/** 上报错题次数（静默失败，不阻塞做题） */
+export async function recordMistakes(params: {
+  userKey: string;
+  questionIds: number[];
+  source: 'practice' | 'exam';
+}): Promise<void> {
+  if (!isConfigured()) return;
+  const userKey = params.userKey.trim();
+  const ids = params.questionIds.filter((n) => Number.isFinite(n) && n > 0);
+  if (!userKey || ids.length === 0) return;
+  try {
+    await post('record-mistake', {
+      userKey,
+      questionIds: ids,
+      source: params.source,
+    });
+  } catch {
+    /* ignore */
+  }
 }

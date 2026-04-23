@@ -158,3 +158,44 @@
   font-size: 20px;
   color: #475569;
 }
+
+.top-row {
+  margin: 0 20px 10px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.top-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.top-rank {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0d9488;
+}
+
+.top-count {
+  font-size: 22px;
+  font-weight: 600;
+  color: #b45309;
+}
+
+.top-meta {
+  display: block;
+  margin-top: 6px;
+  font-size: 20px;
+  color: #64748b;
+}
+
+.top-preview {
+  display: block;
+  margin-top: 8px;
+  font-size: 22px;
+  color: #0f172a;
+  line-height: 1.45;
+}

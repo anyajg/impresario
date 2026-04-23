@@ -16,7 +16,9 @@ import {
   removeWrongId,
   recordAnswer,
   getWrongIds,
+  getAccessState,
 } from '../../utils/storage';
+import { recordMistakes } from '../../utils/access';
 import { ensureAIConfigured, aiAnalyzeQuestion } from '../../utils/ai';
 import TabBar from '../../components/TabBar';
 import './index.scss';
@@ -82,6 +84,14 @@ function PracticePage() {
         removeWrongId(question.id);
       } else {
         addWrongId(question.id);
+        const uk = (getAccessState().userKey || '').trim();
+        if (uk) {
+          void recordMistakes({
+            userKey: uk,
+            questionIds: [question.id],
+            source: 'practice',
+          });
+        }
       }
     },
     [practiceQuestions, currentIndex]

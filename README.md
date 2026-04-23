@@ -113,6 +113,9 @@ npm run build:weapp
 - `access_users`（用户标识）
 - `invite_codes`（邀请码）
 - `invite_redeems`（兑换记录）
+- `question_bank`（完整题库）
+- `question_mistakes`（全站错题记录，用于 Top100）
+- `wrong_question_top100()`（错题 Top100 聚合函数）
 - `redeem_invite` / `access_status` 两个数据库函数
 
 ### 2) 部署 Edge Functions
@@ -122,6 +125,7 @@ npm run build:weapp
 - `supabase/functions/access-status/index.ts`
 - `supabase/functions/questions-page/index.ts`
 - `supabase/functions/analytics-summary/index.ts`
+- `supabase/functions/record-mistake/index.ts`（答错上报，practice / exam）
 
 建议部署命令（允许前端仅携带 `apikey` 访问）：
 
@@ -129,6 +133,7 @@ npm run build:weapp
 supabase functions deploy redeem-invite --no-verify-jwt
 supabase functions deploy access-status --no-verify-jwt
 supabase functions deploy questions-page --no-verify-jwt
+supabase functions deploy record-mistake --no-verify-jwt
 supabase functions deploy analytics-summary --no-verify-jwt
 ```
 

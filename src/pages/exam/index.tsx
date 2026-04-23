@@ -9,7 +9,8 @@ import {
   ensureFullQuestionBankLoaded,
   type Question,
 } from '../../data/questions';
-import { saveExamResult } from '../../utils/storage';
+import { getAccessState, saveExamResult } from '../../utils/storage';
+import { recordMistakes } from '../../utils/access';
 import TabBar from '../../components/TabBar';
 import './index.scss';
 
@@ -90,6 +91,7 @@ function ExamPage() {
     let correctCount = 0;
     const answerRecord: Record<string, number | number[]> = {};
 
+    const wrongExamIds: number[] = [];
     examQuestions.forEach((q) => {
       const userAnswer = answers[q.id];
       if (userAnswer === undefined) {
@@ -97,8 +99,19 @@ function ExamPage() {
       } else {
         answerRecord[String(q.id)] = userAnswer;
       }
-      if (isSelectionCorrect(userAnswer ?? null, q)) correctCount++;
+      const ok = isSelectionCorrect(userAnswer ?? null, q);
+      if (ok) correctCount++;
+      else wrongExamIds.push(q.id);
     });
+
+    const uk = (getAccessState().userKey || '').trim();
+    if (uk && wrongExamIds.length > 0) {
+      void recordMistakes({
+        userKey: uk,
+        questionIds: wrongExamIds,
+        source: 'exam',
+      });
+    }
 
     const result = {
       score: Math.round((correctCount / examQuestions.length) * 100),

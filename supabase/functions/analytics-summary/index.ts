@@ -107,6 +107,21 @@ Deno.serve(async (req) => {
         status: String(it.status || ''),
       }));
 
+    const topR = await supabase.rpc('wrong_question_top100');
+    if (topR.error) {
+      return new Response(JSON.stringify({ ok: false, message: topR.error.message }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const wrongTop100 = ((topR.data || []) as Array<any>).map((it) => ({
+      questionId: Number(it.question_id),
+      mistakeCount: Number(it.mistake_count),
+      chapter: Number(it.chapter ?? 0),
+      contentPreview: String(it.content_preview || ''),
+    }));
+
     return new Response(
       JSON.stringify({
         ok: true,
@@ -119,6 +134,7 @@ Deno.serve(async (req) => {
         },
         recentRedeems,
         usableInviteCodes,
+        wrongTop100,
       }),
       {
         status: 200,

@@ -20,6 +20,14 @@ function AnalyticsPage() {
   const [usableCodes, setUsableCodes] = useState<
     Array<{ code: string; maxUses: number; usedCount: number; status: string }>
   >([]);
+  const [wrongTop, setWrongTop] = useState<
+    Array<{
+      questionId: number;
+      mistakeCount: number;
+      chapter: number;
+      contentPreview: string;
+    }>
+  >([]);
 
   useDidShow(async () => {
     const userKey = (getAccessState().userKey || '').trim();
@@ -46,6 +54,7 @@ function AnalyticsPage() {
     });
     setRecent(resp.recentRedeems || []);
     setUsableCodes(resp.usableInviteCodes || []);
+    setWrongTop(resp.wrongTop100 || []);
   });
 
   const fmt = (iso: string) => {
@@ -113,6 +122,34 @@ function AnalyticsPage() {
               <Text className='code-row-main'>{it.code}</Text>
               <Text className='code-row-sub'>
                 已用 {it.usedCount} / {it.maxUses} · {it.status}
+              </Text>
+            </View>
+          ))}
+
+          <View className='section-title'>
+            <Text>全站错题 Top100</Text>
+          </View>
+          {wrongTop.length === 0 && (
+            <View className='empty-row'>
+              <Text className='empty-text'>
+                暂无错题上报数据（用户需在首页填写昵称且答错题后累积）
+              </Text>
+            </View>
+          )}
+          {wrongTop.map((it, idx) => (
+            <View className='top-row' key={`${it.questionId}_${idx}`}>
+              <View className='top-row-head'>
+                <Text className='top-rank'>#{idx + 1}</Text>
+                <Text className='top-count'>
+                  {it.mistakeCount} 次
+                </Text>
+              </View>
+              <Text className='top-meta'>
+                题号 {it.questionId}
+                {it.chapter ? ` · 第 ${it.chapter} 章` : ''}
+              </Text>
+              <Text className='top-preview'>
+                {it.contentPreview || '（内置题或未匹配到题库正文）'}
               </Text>
             </View>
           ))}
